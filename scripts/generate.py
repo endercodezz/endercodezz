@@ -433,8 +433,14 @@ def panel_activity(data) -> tuple[str, dict]:
     head_label = "contributions" if private else "public contributions"
     note = (f"incl. {fmt(private)} in private repos, counted anonymously" if private
             else "public repos only · private contributions are hidden on this profile")
-    pre = "" if not private else "public "
-    items = [(fmt(total), head_label), (fmt(cc["totalCommitContributions"]), pre + "commits"),
+    # Commits: with a private-capable token, count my commits on the default
+    # branches of every repo it can read (the same set as the rhythm panel).
+    # PR and issue counts from the API never include private repos.
+    full = data["has_private"]
+    commits = len(data["times"]) if full else cc["totalCommitContributions"]
+    pre = "public " if (private or full) else ""
+    items = [(fmt(total), head_label),
+             (fmt(commits), "commits, all repos" if full else pre + "commits"),
              (fmt(cc["totalPullRequestContributions"]), pre + "pull requests"),
              (fmt(cc["totalIssueContributions"]), pre + "issues"), (fmt(active), "active days")]
 
@@ -469,7 +475,7 @@ def panel_activity(data) -> tuple[str, dict]:
     parts += legend(W - 20, base)
 
     stats = {"total": total, "private": private, "label": head_label, "active": active,
-             "commits": cc["totalCommitContributions"], "prs": cc["totalPullRequestContributions"],
+             "commits": commits, "commits_all": full, "prs": cc["totalPullRequestContributions"],
              "issues": cc["totalIssueContributions"], "peak": peak, "last30_share": share}
     return svg(W, h, "\n".join(parts), f"{total} {head_label} in the last year"), stats
 
@@ -693,9 +699,10 @@ def numbers_block(act, langs, rhythm, ship) -> str:
     tot = f"{fmt(act['total'])} {act['label']}"
     if act["private"]:
         tot += f" (incl. {fmt(act['private'])} private, counted anonymously)"
-    pre = "Public breakdown" if act["private"] else "Breakdown"
+    commits = f"{fmt(act['commits'])} commits" + (" across public and private repos" if act["commits_all"] else "")
+    pub = "public " if act["commits_all"] or act["private"] else ""
     lines += [f"| Last year | {tot} on {act['active']} active days |",
-              f"| {pre} | {fmt(act['commits'])} commits · {fmt(act['prs'])} pull requests · {fmt(act['issues'])} issues |",
+              f"| Breakdown | {commits} · {fmt(act['prs'])} {pub}pull requests · {fmt(act['issues'])} {pub}issues |",
               f"| Releases | {ship['releases']} published since {ship['since']} · {fmt(ship['downloads'])} asset downloads |",
               f"| Commit rhythm | busiest hour {rhythm['peak']} · {rhythm['night']}% between 00:00 and 06:00 · {rhythm['weekend']}% on weekends |",
               "| Languages | " + " · ".join(f"{n} {p}%" for n, p in langs) + " |"]
@@ -747,8 +754,10 @@ def main():
     readme = ROOT / "README.md"
     src = readme.read_text("utf-8")
     block = numbers_block(act, langs, rhythm, ship)
-    src = re.sub(r"(<!-- numbers:start -->\n).*?(\n<!-- numbers:end -->)",
-                 lambda m: m.group(1) + block + m.group(2), src, flags=re.S)
+    src, n = re.subn(r"(<!-- numbers:start -->\n).*?(<!-- numbers:end -->)",
+                     lambda m: m.group(1) + block + "\n" + m.group(2), src, flags=re.S)
+    if n != 1:
+        sys.exit("README is missing the <!-- numbers:start/end --> markers")
 
     leak_check({**out, "README.md": src}, data["secrets"])
     ASSETS.mkdir(exist_ok=True)

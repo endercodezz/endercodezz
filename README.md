@@ -33,6 +33,19 @@ I like making software run where it was never meant to: a PSP game on a New 3DS,
 <picture><source media="(prefers-color-scheme: dark)" srcset="assets/rhythm-dark.svg"><source media="(prefers-color-scheme: light)" srcset="assets/rhythm-light.svg"><img src="assets/rhythm-dark.svg" width="100%" alt="Commit punchcard by weekday and hour"></picture>
 
 <!-- numbers:start -->
+<details>
+<summary>The same numbers as text</summary>
+
+| | |
+|---|---|
+| Last year | 981 contributions (incl. 303 private, counted anonymously) on 55 active days |
+| Breakdown | 658 commits across public and private repos · 76 public pull requests · 216 public issues |
+| Releases | 24 published since Aug 2026 · 592 asset downloads |
+| Commit rhythm | busiest hour Tue 15:00 · 29% between 00:00 and 06:00 · 34% on weekends |
+| Languages | C++ 47.0% · C# 18.3% · Python 15.3% · C 5.6% · TypeScript 5.2% · Objective-C++ 3.2% · HTML 1.8% · JavaScript 1.0% · Other 2.6% |
+
+<sub>Generated 2026-11-05 00:36 UTC from the GitHub API.</sub>
+</details>
 <!-- numbers:end -->
 
 ## Toolbox

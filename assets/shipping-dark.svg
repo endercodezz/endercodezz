@@ -17,28 +17,28 @@
 <text x="644.6" y="332.0" class="f mu" font-size="12">Nov</text>
 <circle cx="26" cy="114.0" r="5" fill="#58a6ff"/>
 <text x="40.0" y="118.5" class="f t" font-size="13.5" font-weight="600">P3P3DS</text>
-<line x1="495.3" y1="114.0" x2="659.8" y2="114.0" stroke="#58a6ff" stroke-opacity=".5" stroke-width="2"/>
-<circle cx="495.3" cy="114.0" r="5" fill="#58a6ff" stroke="#161b22" stroke-width="2"/>
+<line x1="495.2" y1="114.0" x2="659.7" y2="114.0" stroke="#58a6ff" stroke-opacity=".5" stroke-width="2"/>
+<circle cx="495.2" cy="114.0" r="5" fill="#58a6ff" stroke="#161b22" stroke-width="2"/>
 <circle cx="498.4" cy="114.0" r="5" fill="#58a6ff" stroke="#161b22" stroke-width="2"/>
-<circle cx="499.4" cy="114.0" r="5" fill="#58a6ff" stroke="#161b22" stroke-width="2"/>
+<circle cx="499.3" cy="114.0" r="5" fill="#58a6ff" stroke="#161b22" stroke-width="2"/>
 <circle cx="499.7" cy="114.0" r="5" fill="#58a6ff" stroke="#161b22" stroke-width="2"/>
-<circle cx="500.4" cy="114.0" r="5" fill="#58a6ff" stroke="#161b22" stroke-width="2"/>
+<circle cx="500.3" cy="114.0" r="5" fill="#58a6ff" stroke="#161b22" stroke-width="2"/>
 <circle cx="503.7" cy="114.0" r="5" fill="#58a6ff" stroke="#161b22" stroke-width="2"/>
 <circle cx="507.3" cy="114.0" r="5" fill="#58a6ff" stroke="#161b22" stroke-width="2"/>
 <circle cx="513.8" cy="114.0" r="5" fill="#58a6ff" stroke="#161b22" stroke-width="2"/>
 <circle cx="514.4" cy="114.0" r="5" fill="#58a6ff" stroke="#161b22" stroke-width="2"/>
 <circle cx="534.0" cy="114.0" r="5" fill="#58a6ff" stroke="#161b22" stroke-width="2"/>
-<circle cx="541.8" cy="114.0" r="5" fill="#58a6ff" stroke="#161b22" stroke-width="2"/>
+<circle cx="541.7" cy="114.0" r="5" fill="#58a6ff" stroke="#161b22" stroke-width="2"/>
 <circle cx="542.7" cy="114.0" r="5" fill="#58a6ff" stroke="#161b22" stroke-width="2"/>
-<circle cx="659.8" cy="114.0" r="5" fill="#58a6ff" stroke="#161b22" stroke-width="2"/>
+<circle cx="659.7" cy="114.0" r="5" fill="#58a6ff" stroke="#161b22" stroke-width="2"/>
 <text x="730.0" y="118.5" class="f t num" font-size="13.5" font-weight="600" text-anchor="end">13</text>
 <text x="820.0" y="118.5" class="f mu num" font-size="13.5" text-anchor="end">473</text>
 <line x1="20" y1="132.0" x2="820" y2="132.0" stroke="#21262d"/>
 <circle cx="26" cy="150.0" r="5" fill="#d29922"/>
 <text x="40.0" y="154.5" class="f t" font-size="13.5" font-weight="600">BYDLO</text>
-<line x1="652.7" y1="150.0" x2="659.2" y2="150.0" stroke="#d29922" stroke-opacity=".5" stroke-width="2"/>
-<circle cx="652.7" cy="150.0" r="5" fill="#d29922" stroke="#161b22" stroke-width="2"/>
-<circle cx="654.4" cy="150.0" r="5" fill="#d29922" stroke="#161b22" stroke-width="2"/>
+<line x1="652.6" y1="150.0" x2="659.2" y2="150.0" stroke="#d29922" stroke-opacity=".5" stroke-width="2"/>
+<circle cx="652.6" cy="150.0" r="5" fill="#d29922" stroke="#161b22" stroke-width="2"/>
+<circle cx="654.3" cy="150.0" r="5" fill="#d29922" stroke="#161b22" stroke-width="2"/>
 <circle cx="655.5" cy="150.0" r="5" fill="#d29922" stroke="#161b22" stroke-width="2"/>
 <circle cx="659.2" cy="150.0" r="5" fill="#d29922" stroke="#161b22" stroke-width="2"/>
 <text x="730.0" y="154.5" class="f t num" font-size="13.5" font-weight="600" text-anchor="end">4</text>
@@ -46,18 +46,18 @@
 <line x1="20" y1="168.0" x2="820" y2="168.0" stroke="#21262d"/>
 <circle cx="26" cy="186.0" r="5" fill="#bc8cff"/>
 <text x="40.0" y="190.5" class="f t" font-size="13.5" font-weight="600">AnimeBox</text>
-<line x1="239.7" y1="186.0" x2="542.9" y2="186.0" stroke="#bc8cff" stroke-opacity=".5" stroke-width="2"/>
+<line x1="239.7" y1="186.0" x2="542.8" y2="186.0" stroke="#bc8cff" stroke-opacity=".5" stroke-width="2"/>
 <circle cx="239.7" cy="186.0" r="5" fill="#bc8cff" stroke="#161b22" stroke-width="2"/>
-<circle cx="542.9" cy="186.0" r="5" fill="#bc8cff" stroke="#161b22" stroke-width="2"/>
+<circle cx="542.8" cy="186.0" r="5" fill="#bc8cff" stroke="#161b22" stroke-width="2"/>
 <text x="730.0" y="190.5" class="f t num" font-size="13.5" font-weight="600" text-anchor="end">2</text>
 <text x="820.0" y="190.5" class="f mu num" font-size="13.5" text-anchor="end">34</text>
 <line x1="20" y1="204.0" x2="820" y2="204.0" stroke="#21262d"/>
 <circle cx="26" cy="222.0" r="5" fill="#3fb950"/>
 <text x="40.0" y="226.5" class="f t" font-size="13.5" font-weight="600">WW HD Recomp · Deck</text>
-<line x1="522.5" y1="222.0" x2="523.1" y2="222.0" stroke="#3fb950" stroke-opacity=".5" stroke-width="2"/>
+<line x1="522.5" y1="222.0" x2="523.0" y2="222.0" stroke="#3fb950" stroke-opacity=".5" stroke-width="2"/>
 <circle cx="522.5" cy="222.0" r="5" fill="#3fb950" stroke="#161b22" stroke-width="2"/>
 <circle cx="522.9" cy="222.0" r="5" fill="#3fb950" stroke="#161b22" stroke-width="2"/>
-<circle cx="523.1" cy="222.0" r="5" fill="#3fb950" stroke="#161b22" stroke-width="2"/>
+<circle cx="523.0" cy="222.0" r="5" fill="#3fb950" stroke="#161b22" stroke-width="2"/>
 <text x="730.0" y="226.5" class="f t num" font-size="13.5" font-weight="600" text-anchor="end">3</text>
 <text x="820.0" y="226.5" class="f mu num" font-size="13.5" text-anchor="end">8</text>
 <line x1="20" y1="240.0" x2="820" y2="240.0" stroke="#21262d"/>
