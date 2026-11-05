@@ -38,13 +38,13 @@ I like making software run where it was never meant to: a PSP game on a New 3DS,
 
 | | |
 |---|---|
-| Last year | 986 contributions (incl. 303 private, counted anonymously) on 55 active days |
-| Breakdown | 658 commits across public and private repos · 76 public pull requests · 216 public issues |
-| Releases | 24 published since Aug 2026 · 620 asset downloads |
-| Commit rhythm | busiest hour Mon 18:00 · 17% between 00:00 and 06:00 · 33% on weekends |
+| Last year | 991 contributions (incl. 303 private, counted anonymously) on 55 active days |
+| Breakdown | 658 commits across public and private repos · 77 public pull requests · 220 public issues |
+| Releases | 24 published since Aug 2026 · 633 asset downloads |
+| Commit rhythm | busiest hour Mon 18:00 UTC · 17% between 00:00 and 06:00 UTC · 33% on weekends |
 | Languages | C++ 47.0% · C# 18.3% · Python 15.3% · C 5.6% · TypeScript 5.2% · Objective-C++ 3.2% · HTML 1.8% · JavaScript 1.0% · Other 2.6% |
 
-<sub>Generated 2026-11-05 11:10 UTC from the GitHub API.</sub>
+<sub>Generated 2026-11-05 16:47 UTC from the GitHub API.</sub>
 </details>
 <!-- numbers:end -->
 
@@ -55,4 +55,4 @@ I like making software run where it was never meant to: a PSP game on a New 3DS,
 **Builds:** CMake · devkitARM · GitHub Actions CI and releases<br>
 **Targets:** Windows · Linux · macOS · New Nintendo 3DS · Steam Deck
 
-<sub>Every chart on this page is redrawn daily by <a href=".github/workflows/refresh.yml">a workflow in this repo</a> from the GitHub API. No time trackers and no third-party stat services. Private repositories count toward the totals and are never named.</sub>
+<sub>Every chart on this page is redrawn twice a day, at 00:00 and 12:00 UTC, by <a href=".github/workflows/refresh.yml">a workflow in this repo</a> from the GitHub API. No time trackers and no third-party stat services. Private repositories count toward the totals and are never named.</sub>

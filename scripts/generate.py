@@ -41,6 +41,8 @@ USER = os.environ.get("GH_USER", "endercodezz")
 TOKEN = os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
 TZ = ZoneInfo(os.environ.get("PROFILE_TZ") or "UTC")
 NOW = dt.datetime.now(dt.timezone.utc)
+# Shown next to every hour of day: the rhythm is computed in this zone.
+TZ_LABEL = "UTC" if str(TZ) in ("UTC", "Etc/UTC") else str(TZ)
 CONFIG = json.loads((Path(__file__).resolve().parent / "profile.json").read_text("utf-8"))
 PRIVATE = "PRIVATE"
 W = 840
@@ -537,9 +539,9 @@ def panel_rhythm(data) -> tuple[str, dict]:
 
     h = 382
     scope = "public and private repos" if data["has_private"] else "public repos"
-    parts = [box(W, h), *box_header(W, "Commit rhythm", f"{fmt(n)} commits · {scope} · last 12 months · local time"),
-             *counters(28, 100, [(f"{names[wd]} {hr:02d}:00", "busiest hour"),
-                                 (f"{pct(night)}%", "between 00:00 and 06:00"),
+    parts = [box(W, h), *box_header(W, "Commit rhythm", f"{fmt(n)} commits · {scope} · last 12 months · hours in {TZ_LABEL}"),
+             *counters(28, 100, [(f"{names[wd]} {hr:02d}:00", f"busiest hour, {TZ_LABEL}"),
+                                 (f"{pct(night)}%", f"between 00:00 and 06:00 {TZ_LABEL}"),
                                  (f"{pct(weekend)}%", "on weekends")], W - 40)]
     flat = [grid[d][hh] for d in range(7) for hh in range(24)]
     lv = levels(flat)
@@ -556,7 +558,7 @@ def panel_rhythm(data) -> tuple[str, dict]:
     for hh in range(0, 24, 3):
         parts.append(text(gx + hh * (cw + gap), yb, f"{hh:02d}:00", "f mu", 12))
     parts += legend(W - 20, yb + 14)
-    stats = {"n": n, "peak": f"{names[wd]} {hr:02d}:00", "night": pct(night), "weekend": pct(weekend), "grid": grid}
+    stats = {"n": n, "peak": f"{names[wd]} {hr:02d}:00 {TZ_LABEL}", "night": pct(night), "weekend": pct(weekend), "grid": grid}
     return svg(W, h, "\n".join(parts), f"Commit rhythm: busiest hour {stats['peak']}, "
                f"{stats['night']}% between midnight and 6am"), stats
 
@@ -724,7 +726,7 @@ def export_json(data, act, langs, rhythm, ship) -> str:
         },
         "languages": [{"name": n, "pct": p, "color": c} for n, p, c in langs],
         "rhythm": {"commits": rhythm["n"], "grid": rhythm["grid"],
-                   "tz": "UTC" if str(TZ) == "UTC" else "local"},
+                   "tz": TZ_LABEL},
         "releases": [{"repo": r["repo"], "tag": None if r["repo"] == PRIVATE else r["tag"],
                       "at": r["at"].isoformat(), "downloads": r["downloads"]}
                      for r in sorted(data["releases"], key=lambda r: r["at"])],
@@ -743,7 +745,7 @@ def numbers_block(act, langs, rhythm, ship) -> str:
     lines += [f"| Last year | {tot} on {act['active']} active days |",
               f"| Breakdown | {commits} · {fmt(act['prs'])} {pub}pull requests · {fmt(act['issues'])} {pub}issues |",
               f"| Releases | {ship['releases']} published since {ship['since']} · {fmt(ship['downloads'])} asset downloads |",
-              f"| Commit rhythm | busiest hour {rhythm['peak']} · {rhythm['night']}% between 00:00 and 06:00 · {rhythm['weekend']}% on weekends |",
+              f"| Commit rhythm | busiest hour {rhythm['peak']} · {rhythm['night']}% between 00:00 and 06:00 {TZ_LABEL} · {rhythm['weekend']}% on weekends |",
               "| Languages | " + " · ".join(f"{n} {p}%" for n, p, _ in langs) + " |"]
     stamp = NOW.strftime("%Y-%m-%d %H:%M UTC")
     return ("<details>\n<summary>The same numbers as text</summary>\n\n" + "\n".join(lines) +
