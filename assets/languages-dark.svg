@@ -1,27 +1,27 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="840" height="196" viewBox="0 0 840 196" role="img" aria-label="Languages by share of bytes: C++ 47.0%, C# 18.3%, Python 15.3%, C 5.6%, TypeScript 5.2%, Objective-C++ 3.2%, HTML 1.8%, JavaScript 1.0%, Other 2.6%">
-<title>Languages by share of bytes: C++ 47.0%, C# 18.3%, Python 15.3%, C 5.6%, TypeScript 5.2%, Objective-C++ 3.2%, HTML 1.8%, JavaScript 1.0%, Other 2.6%</title>
+<svg xmlns="http://www.w3.org/2000/svg" width="840" height="196" viewBox="0 0 840 196" role="img" aria-label="Languages by share of bytes: C++ 46.9%, C# 18.2%, Python 15.3%, C 5.6%, TypeScript 5.2%, Objective-C++ 3.2%, HTML 1.8%, JavaScript 1.0%, Other 2.8%">
+<title>Languages by share of bytes: C++ 46.9%, C# 18.2%, Python 15.3%, C 5.6%, TypeScript 5.2%, Objective-C++ 3.2%, HTML 1.8%, JavaScript 1.0%, Other 2.8%</title>
 <style>.f{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans',Helvetica,Arial,sans-serif}.mono{font-family:ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace}.t{fill:#e6edf3}.mu{fill:#8b949e}.su{fill:#6e7681}.bl{fill:#58a6ff}.gr{fill:#3fb950}.num{font-variant-numeric:tabular-nums}</style>
 <rect x=".5" y=".5" width="839" height="195" rx="6" fill="#161b22" stroke="#30363d"/>
 <text x="20.0" y="34.0" class="f t" font-size="16" font-weight="600">Languages</text>
 <line x1="1" y1="54.5" x2="839" y2="54.5" stroke="#30363d"/>
 <text x="820.0" y="34.0" class="f mu" font-size="12.5" text-anchor="end">share of bytes · own repos, public and private · forks excluded</text>
 <clipPath id="bar"><rect x="20" y="76" width="800" height="8" rx="4"/></clipPath><g clip-path="url(#bar)">
-<rect x="20.0" y="76" width="368.7" height="8" fill="#f34b7d"/>
-<rect x="390.7" y="76" width="143.4" height="8" fill="#7355dd"/>
-<rect x="536.1" y="76" width="119.9" height="8" fill="#3572A5"/>
-<rect x="658.1" y="76" width="43.9" height="8" fill="#555555"/>
-<rect x="703.9" y="76" width="40.9" height="8" fill="#3178c6"/>
-<rect x="746.8" y="76" width="24.8" height="8" fill="#6866fb"/>
-<rect x="773.7" y="76" width="13.8" height="8" fill="#e34c26"/>
-<rect x="789.4" y="76" width="8.0" height="8" fill="#f1e05a"/>
-<rect x="799.4" y="76" width="20.6" height="8" fill="#6e7681"/>
+<rect x="20.0" y="76" width="368.0" height="8" fill="#f34b7d"/>
+<rect x="390.0" y="76" width="142.9" height="8" fill="#7355dd"/>
+<rect x="534.9" y="76" width="120.0" height="8" fill="#3572A5"/>
+<rect x="656.9" y="76" width="43.7" height="8" fill="#555555"/>
+<rect x="702.6" y="76" width="40.8" height="8" fill="#3178c6"/>
+<rect x="745.3" y="76" width="24.7" height="8" fill="#6866fb"/>
+<rect x="772.1" y="76" width="13.7" height="8" fill="#e34c26"/>
+<rect x="787.8" y="76" width="8.0" height="8" fill="#f1e05a"/>
+<rect x="797.8" y="76" width="22.2" height="8" fill="#6e7681"/>
 </g>
 <circle cx="25.0" cy="113.5" r="5" fill="#f34b7d"/>
 <text x="38.0" y="118.0" class="f t" font-size="13.5" font-weight="600">C++</text>
-<text x="258.7" y="118.0" class="f mu num" font-size="13.5" text-anchor="end">47.0%</text>
+<text x="258.7" y="118.0" class="f mu num" font-size="13.5" text-anchor="end">46.9%</text>
 <circle cx="291.6666666666667" cy="113.5" r="5" fill="#7355dd"/>
 <text x="304.7" y="118.0" class="f t" font-size="13.5" font-weight="600">C#</text>
-<text x="525.3" y="118.0" class="f mu num" font-size="13.5" text-anchor="end">18.3%</text>
+<text x="525.3" y="118.0" class="f mu num" font-size="13.5" text-anchor="end">18.2%</text>
 <circle cx="558.3333333333334" cy="113.5" r="5" fill="#3572A5"/>
 <text x="571.3" y="118.0" class="f t" font-size="13.5" font-weight="600">Python</text>
 <text x="792.0" y="118.0" class="f mu num" font-size="13.5" text-anchor="end">15.3%</text>
@@ -42,5 +42,5 @@
 <text x="525.3" y="174.0" class="f mu num" font-size="13.5" text-anchor="end">1.0%</text>
 <circle cx="558.3333333333334" cy="169.5" r="5" fill="#6e7681"/>
 <text x="571.3" y="174.0" class="f t" font-size="13.5" font-weight="600">Other</text>
-<text x="792.0" y="174.0" class="f mu num" font-size="13.5" text-anchor="end">2.6%</text>
+<text x="792.0" y="174.0" class="f mu num" font-size="13.5" text-anchor="end">2.8%</text>
 </svg>
