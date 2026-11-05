@@ -19,13 +19,13 @@
 <text x="40.0" y="118.5" class="f t" font-size="13.5" font-weight="600">P3P3DS</text>
 <line x1="495.2" y1="114.0" x2="659.7" y2="114.0" stroke="#0969da" stroke-opacity=".5" stroke-width="2"/>
 <circle cx="495.2" cy="114.0" r="5" fill="#0969da" stroke="#f6f8fa" stroke-width="2"/>
-<circle cx="498.4" cy="114.0" r="5" fill="#0969da" stroke="#f6f8fa" stroke-width="2"/>
+<circle cx="498.3" cy="114.0" r="5" fill="#0969da" stroke="#f6f8fa" stroke-width="2"/>
 <circle cx="499.3" cy="114.0" r="5" fill="#0969da" stroke="#f6f8fa" stroke-width="2"/>
-<circle cx="499.7" cy="114.0" r="5" fill="#0969da" stroke="#f6f8fa" stroke-width="2"/>
+<circle cx="499.6" cy="114.0" r="5" fill="#0969da" stroke="#f6f8fa" stroke-width="2"/>
 <circle cx="500.3" cy="114.0" r="5" fill="#0969da" stroke="#f6f8fa" stroke-width="2"/>
 <circle cx="503.6" cy="114.0" r="5" fill="#0969da" stroke="#f6f8fa" stroke-width="2"/>
-<circle cx="507.3" cy="114.0" r="5" fill="#0969da" stroke="#f6f8fa" stroke-width="2"/>
-<circle cx="513.8" cy="114.0" r="5" fill="#0969da" stroke="#f6f8fa" stroke-width="2"/>
+<circle cx="507.2" cy="114.0" r="5" fill="#0969da" stroke="#f6f8fa" stroke-width="2"/>
+<circle cx="513.7" cy="114.0" r="5" fill="#0969da" stroke="#f6f8fa" stroke-width="2"/>
 <circle cx="514.4" cy="114.0" r="5" fill="#0969da" stroke="#f6f8fa" stroke-width="2"/>
 <circle cx="533.9" cy="114.0" r="5" fill="#0969da" stroke="#f6f8fa" stroke-width="2"/>
 <circle cx="541.7" cy="114.0" r="5" fill="#0969da" stroke="#f6f8fa" stroke-width="2"/>
@@ -36,11 +36,11 @@
 <line x1="20" y1="132.0" x2="820" y2="132.0" stroke="#d8dee4"/>
 <circle cx="26" cy="150.0" r="5" fill="#9a6700"/>
 <text x="40.0" y="154.5" class="f t" font-size="13.5" font-weight="600">BYDLO</text>
-<line x1="652.6" y1="150.0" x2="659.2" y2="150.0" stroke="#9a6700" stroke-opacity=".5" stroke-width="2"/>
-<circle cx="652.6" cy="150.0" r="5" fill="#9a6700" stroke="#f6f8fa" stroke-width="2"/>
+<line x1="652.5" y1="150.0" x2="659.1" y2="150.0" stroke="#9a6700" stroke-opacity=".5" stroke-width="2"/>
+<circle cx="652.5" cy="150.0" r="5" fill="#9a6700" stroke="#f6f8fa" stroke-width="2"/>
 <circle cx="654.3" cy="150.0" r="5" fill="#9a6700" stroke="#f6f8fa" stroke-width="2"/>
-<circle cx="655.5" cy="150.0" r="5" fill="#9a6700" stroke="#f6f8fa" stroke-width="2"/>
-<circle cx="659.2" cy="150.0" r="5" fill="#9a6700" stroke="#f6f8fa" stroke-width="2"/>
+<circle cx="655.4" cy="150.0" r="5" fill="#9a6700" stroke="#f6f8fa" stroke-width="2"/>
+<circle cx="659.1" cy="150.0" r="5" fill="#9a6700" stroke="#f6f8fa" stroke-width="2"/>
 <text x="730.0" y="154.5" class="f t num" font-size="13.5" font-weight="600" text-anchor="end">4</text>
 <text x="820.0" y="154.5" class="f mu num" font-size="13.5" text-anchor="end">64</text>
 <line x1="20" y1="168.0" x2="820" y2="168.0" stroke="#d8dee4"/>
@@ -56,14 +56,14 @@
 <text x="40.0" y="226.5" class="f t" font-size="13.5" font-weight="600">WW HD Recomp · Deck</text>
 <line x1="522.4" y1="222.0" x2="523.0" y2="222.0" stroke="#1a7f37" stroke-opacity=".5" stroke-width="2"/>
 <circle cx="522.4" cy="222.0" r="5" fill="#1a7f37" stroke="#f6f8fa" stroke-width="2"/>
-<circle cx="522.9" cy="222.0" r="5" fill="#1a7f37" stroke="#f6f8fa" stroke-width="2"/>
+<circle cx="522.8" cy="222.0" r="5" fill="#1a7f37" stroke="#f6f8fa" stroke-width="2"/>
 <circle cx="523.0" cy="222.0" r="5" fill="#1a7f37" stroke="#f6f8fa" stroke-width="2"/>
 <text x="730.0" y="226.5" class="f t num" font-size="13.5" font-weight="600" text-anchor="end">3</text>
 <text x="820.0" y="226.5" class="f mu num" font-size="13.5" text-anchor="end">8</text>
 <line x1="20" y1="240.0" x2="820" y2="240.0" stroke="#d8dee4"/>
 <circle cx="26" cy="258.0" r="5" fill="#bf3989"/>
 <text x="40.0" y="262.5" class="f t" font-size="13.5" font-weight="600">Enderlit Player</text>
-<circle cx="539.8" cy="258.0" r="5" fill="#bf3989" stroke="#f6f8fa" stroke-width="2"/>
+<circle cx="539.7" cy="258.0" r="5" fill="#bf3989" stroke="#f6f8fa" stroke-width="2"/>
 <text x="730.0" y="262.5" class="f t num" font-size="13.5" font-weight="600" text-anchor="end">1</text>
 <text x="820.0" y="262.5" class="f mu num" font-size="13.5" text-anchor="end">3</text>
 <line x1="20" y1="276.0" x2="820" y2="276.0" stroke="#d8dee4"/>

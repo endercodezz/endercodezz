@@ -518,9 +518,9 @@ def panel_languages(data) -> tuple[str, list]:
         parts.append(f'<circle cx="{cx + 5}" cy="{cy - 4.5}" r="5" fill="{colors[n]}"/>')
         parts.append(text(cx + 18, cy, n, "f t", 13.5, 600))
         parts.append(text(cx + colw - 28, cy, f"{pct:.1f}%" if pct >= .1 else "<0.1%", "f mu num", 13.5, anchor="end"))
-    summary = [(n, round(100 * v / tot, 1)) for n, v in rows]
+    summary = [(n, round(100 * v / tot, 1), colors[n]) for n, v in rows]
     return svg(W, h, "\n".join(parts), "Languages by share of bytes: " +
-               ", ".join(f"{n} {p}%" for n, p in summary)), summary
+               ", ".join(f"{n} {p}%" for n, p, _ in summary)), summary
 
 
 def panel_rhythm(data) -> tuple[str, dict]:
@@ -556,7 +556,7 @@ def panel_rhythm(data) -> tuple[str, dict]:
     for hh in range(0, 24, 3):
         parts.append(text(gx + hh * (cw + gap), yb, f"{hh:02d}:00", "f mu", 12))
     parts += legend(W - 20, yb + 14)
-    stats = {"n": n, "peak": f"{names[wd]} {hr:02d}:00", "night": pct(night), "weekend": pct(weekend)}
+    stats = {"n": n, "peak": f"{names[wd]} {hr:02d}:00", "night": pct(night), "weekend": pct(weekend), "grid": grid}
     return svg(W, h, "\n".join(parts), f"Commit rhythm: busiest hour {stats['peak']}, "
                f"{stats['night']}% between midnight and 6am"), stats
 
@@ -694,6 +694,45 @@ def card_small(data, p) -> str:
 
 
 # ---------------------------------------------------------------- README block
+def export_json(data, act, langs, rhythm, ship) -> str:
+    """Aggregated, public-safe data for enderlit.com. Private repos appear only
+    as the PRIVATE bucket (no names, no tags); everything else is public info."""
+    days = [x for w in data["cc"]["contributionCalendar"]["weeks"] for x in w["contributionDays"]]
+    projects = []
+    for p in CONFIG["featured"] + CONFIG["more"]:
+        r, rels = repo_stats(data, p["repo"])
+        projects.append({
+            "repo": p["repo"], "name": p.get("name", p["repo"]),
+            "featured": p in CONFIG["featured"], "color_index": project_order().index(p["repo"]),
+            "stars": r["stargazerCount"], "forks": r["forkCount"],
+            "commits": data["my_commits"].get(p["repo"], 0),
+            "language": r["primaryLanguage"], "pushed": r["pushedAt"],
+            "releases": len(rels), "downloads": sum(x["downloads"] for x in rels),
+            "latest": {"tag": rels[0]["tag"], "at": rels[0]["at"].isoformat()} if rels else None,
+        })
+    tracked = {p["repo"] for p in projects}
+    others = [{"repo": r["name"], "description": r["description"], "stars": r["stargazerCount"],
+               "language": r["primaryLanguage"], "pushed": r["pushedAt"]}
+              for r in data["repos"] if not r["isFork"] and r["name"] not in tracked]
+    payload = {
+        "v": 1, "generated": NOW.isoformat(timespec="seconds"), "user": USER,
+        "contributions": {
+            "total": act["total"], "private": act["private"], "active_days": act["active"],
+            "commits": act["commits"], "commits_all_repos": act["commits_all"],
+            "pull_requests": act["prs"], "issues": act["issues"],
+            "start": days[0]["date"], "counts": [x["contributionCount"] for x in days],
+        },
+        "languages": [{"name": n, "pct": p, "color": c} for n, p, c in langs],
+        "rhythm": {"commits": rhythm["n"], "grid": rhythm["grid"],
+                   "tz": "UTC" if str(TZ) == "UTC" else "local"},
+        "releases": [{"repo": r["repo"], "tag": None if r["repo"] == PRIVATE else r["tag"],
+                      "at": r["at"].isoformat(), "downloads": r["downloads"]}
+                     for r in sorted(data["releases"], key=lambda r: r["at"])],
+        "projects": projects, "other_repos": others,
+    }
+    return json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
+
+
 def numbers_block(act, langs, rhythm, ship) -> str:
     lines = ["| | |", "|---|---|"]
     tot = f"{fmt(act['total'])} {act['label']}"
@@ -705,7 +744,7 @@ def numbers_block(act, langs, rhythm, ship) -> str:
               f"| Breakdown | {commits} · {fmt(act['prs'])} {pub}pull requests · {fmt(act['issues'])} {pub}issues |",
               f"| Releases | {ship['releases']} published since {ship['since']} · {fmt(ship['downloads'])} asset downloads |",
               f"| Commit rhythm | busiest hour {rhythm['peak']} · {rhythm['night']}% between 00:00 and 06:00 · {rhythm['weekend']}% on weekends |",
-              "| Languages | " + " · ".join(f"{n} {p}%" for n, p in langs) + " |"]
+              "| Languages | " + " · ".join(f"{n} {p}%" for n, p, _ in langs) + " |"]
     stamp = NOW.strftime("%Y-%m-%d %H:%M UTC")
     return ("<details>\n<summary>The same numbers as text</summary>\n\n" + "\n".join(lines) +
             f"\n\n<sub>Generated {stamp} from the GitHub API.</sub>\n</details>")
@@ -762,9 +801,10 @@ def main():
     if n != 1:
         sys.exit("README is missing the <!-- numbers:start/end --> markers")
 
+    out["stats.json"] = export_json(data, act, langs, rhythm, ship)
     leak_check({**out, "README.md": src}, data["secrets"])
     ASSETS.mkdir(exist_ok=True)
-    for old in ASSETS.glob("*.svg"):
+    for old in [*ASSETS.glob("*.svg"), *ASSETS.glob("*.json")]:
         if old.name not in out:
             old.unlink()
     for name, content in out.items():
