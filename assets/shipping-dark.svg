@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="840" height="356" viewBox="0 0 840 356" role="img" aria-label="24 releases and 592 downloads since Aug 2026">
+<title>24 releases and 592 downloads since Aug 2026</title>
+<style>.f{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans',Helvetica,Arial,sans-serif}.mono{font-family:ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace}.t{fill:#e6edf3}.mu{fill:#8b949e}.su{fill:#6e7681}.bl{fill:#58a6ff}.gr{fill:#3fb950}.num{font-variant-numeric:tabular-nums}</style>
+<rect x=".5" y=".5" width="839" height="355" rx="6" fill="#161b22" stroke="#30363d"/>
+<text x="20.0" y="34.0" class="f t" font-size="16" font-weight="600">Releases</text>
+<line x1="1" y1="54.5" x2="839" y2="54.5" stroke="#30363d"/>
+<text x="820.0" y="34.0" class="f mu" font-size="12.5" text-anchor="end">24 published since Aug 2026 · 592 asset downloads</text>
+<text x="730.0" y="82.0" class="f mu" font-size="12" text-anchor="end">releases</text>
+<text x="820.0" y="82.0" class="f mu" font-size="12" text-anchor="end">downloads</text>
+<line x1="196.0" y1="92" x2="196.0" y2="312" stroke="#21262d"/>
+<text x="200.0" y="332.0" class="f mu" font-size="12">Aug 2026</text>
+<line x1="345.8" y1="92" x2="345.8" y2="312" stroke="#21262d"/>
+<text x="349.8" y="332.0" class="f mu" font-size="12">Sep</text>
+<line x1="490.8" y1="92" x2="490.8" y2="312" stroke="#21262d"/>
+<text x="494.8" y="332.0" class="f mu" font-size="12">Oct</text>
+<line x1="640.6" y1="92" x2="640.6" y2="312" stroke="#21262d"/>
+<text x="644.6" y="332.0" class="f mu" font-size="12">Nov</text>
+<circle cx="26" cy="114.0" r="5" fill="#58a6ff"/>
+<text x="40.0" y="118.5" class="f t" font-size="13.5" font-weight="600">P3P3DS</text>
+<line x1="495.3" y1="114.0" x2="659.8" y2="114.0" stroke="#58a6ff" stroke-opacity=".5" stroke-width="2"/>
+<circle cx="495.3" cy="114.0" r="5" fill="#58a6ff" stroke="#161b22" stroke-width="2"/>
+<circle cx="498.4" cy="114.0" r="5" fill="#58a6ff" stroke="#161b22" stroke-width="2"/>
+<circle cx="499.4" cy="114.0" r="5" fill="#58a6ff" stroke="#161b22" stroke-width="2"/>
+<circle cx="499.7" cy="114.0" r="5" fill="#58a6ff" stroke="#161b22" stroke-width="2"/>
+<circle cx="500.4" cy="114.0" r="5" fill="#58a6ff" stroke="#161b22" stroke-width="2"/>
+<circle cx="503.7" cy="114.0" r="5" fill="#58a6ff" stroke="#161b22" stroke-width="2"/>
+<circle cx="507.3" cy="114.0" r="5" fill="#58a6ff" stroke="#161b22" stroke-width="2"/>
+<circle cx="513.8" cy="114.0" r="5" fill="#58a6ff" stroke="#161b22" stroke-width="2"/>
+<circle cx="514.4" cy="114.0" r="5" fill="#58a6ff" stroke="#161b22" stroke-width="2"/>
+<circle cx="534.0" cy="114.0" r="5" fill="#58a6ff" stroke="#161b22" stroke-width="2"/>
+<circle cx="541.8" cy="114.0" r="5" fill="#58a6ff" stroke="#161b22" stroke-width="2"/>
+<circle cx="542.7" cy="114.0" r="5" fill="#58a6ff" stroke="#161b22" stroke-width="2"/>
+<circle cx="659.8" cy="114.0" r="5" fill="#58a6ff" stroke="#161b22" stroke-width="2"/>
+<text x="730.0" y="118.5" class="f t num" font-size="13.5" font-weight="600" text-anchor="end">13</text>
+<text x="820.0" y="118.5" class="f mu num" font-size="13.5" text-anchor="end">473</text>
+<line x1="20" y1="132.0" x2="820" y2="132.0" stroke="#21262d"/>
+<circle cx="26" cy="150.0" r="5" fill="#d29922"/>
+<text x="40.0" y="154.5" class="f t" font-size="13.5" font-weight="600">BYDLO</text>
+<line x1="652.7" y1="150.0" x2="659.2" y2="150.0" stroke="#d29922" stroke-opacity=".5" stroke-width="2"/>
+<circle cx="652.7" cy="150.0" r="5" fill="#d29922" stroke="#161b22" stroke-width="2"/>
+<circle cx="654.4" cy="150.0" r="5" fill="#d29922" stroke="#161b22" stroke-width="2"/>
+<circle cx="655.5" cy="150.0" r="5" fill="#d29922" stroke="#161b22" stroke-width="2"/>
+<circle cx="659.2" cy="150.0" r="5" fill="#d29922" stroke="#161b22" stroke-width="2"/>
+<text x="730.0" y="154.5" class="f t num" font-size="13.5" font-weight="600" text-anchor="end">4</text>
+<text x="820.0" y="154.5" class="f mu num" font-size="13.5" text-anchor="end">64</text>
+<line x1="20" y1="168.0" x2="820" y2="168.0" stroke="#21262d"/>
+<circle cx="26" cy="186.0" r="5" fill="#bc8cff"/>
+<text x="40.0" y="190.5" class="f t" font-size="13.5" font-weight="600">AnimeBox</text>
+<line x1="239.7" y1="186.0" x2="542.9" y2="186.0" stroke="#bc8cff" stroke-opacity=".5" stroke-width="2"/>
+<circle cx="239.7" cy="186.0" r="5" fill="#bc8cff" stroke="#161b22" stroke-width="2"/>
+<circle cx="542.9" cy="186.0" r="5" fill="#bc8cff" stroke="#161b22" stroke-width="2"/>
+<text x="730.0" y="190.5" class="f t num" font-size="13.5" font-weight="600" text-anchor="end">2</text>
+<text x="820.0" y="190.5" class="f mu num" font-size="13.5" text-anchor="end">34</text>
+<line x1="20" y1="204.0" x2="820" y2="204.0" stroke="#21262d"/>
+<circle cx="26" cy="222.0" r="5" fill="#3fb950"/>
+<text x="40.0" y="226.5" class="f t" font-size="13.5" font-weight="600">WW HD Recomp · Deck</text>
+<line x1="522.5" y1="222.0" x2="523.1" y2="222.0" stroke="#3fb950" stroke-opacity=".5" stroke-width="2"/>
+<circle cx="522.5" cy="222.0" r="5" fill="#3fb950" stroke="#161b22" stroke-width="2"/>
+<circle cx="522.9" cy="222.0" r="5" fill="#3fb950" stroke="#161b22" stroke-width="2"/>
+<circle cx="523.1" cy="222.0" r="5" fill="#3fb950" stroke="#161b22" stroke-width="2"/>
+<text x="730.0" y="226.5" class="f t num" font-size="13.5" font-weight="600" text-anchor="end">3</text>
+<text x="820.0" y="226.5" class="f mu num" font-size="13.5" text-anchor="end">8</text>
+<line x1="20" y1="240.0" x2="820" y2="240.0" stroke="#21262d"/>
+<circle cx="26" cy="258.0" r="5" fill="#f778ba"/>
+<text x="40.0" y="262.5" class="f t" font-size="13.5" font-weight="600">Enderlit Player</text>
+<circle cx="539.8" cy="258.0" r="5" fill="#f778ba" stroke="#161b22" stroke-width="2"/>
+<text x="730.0" y="262.5" class="f t num" font-size="13.5" font-weight="600" text-anchor="end">1</text>
+<text x="820.0" y="262.5" class="f mu num" font-size="13.5" text-anchor="end">3</text>
+<line x1="20" y1="276.0" x2="820" y2="276.0" stroke="#21262d"/>
+<circle cx="26" cy="294.0" r="5" fill="#f0883e"/>
+<text x="40.0" y="298.5" class="f t" font-size="13.5" font-weight="600">3Dropia</text>
+<circle cx="485.5" cy="294.0" r="5" fill="#f0883e" stroke="#161b22" stroke-width="2"/>
+<text x="730.0" y="298.5" class="f t num" font-size="13.5" font-weight="600" text-anchor="end">1</text>
+<text x="820.0" y="298.5" class="f mu num" font-size="13.5" text-anchor="end">10</text>
+</svg>

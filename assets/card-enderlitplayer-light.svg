@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="410" height="176" viewBox="0 0 410 176" role="img" aria-label="enderlitplayer: A minimal desktop player for local music libraries. 2.0 is a full rewrite with a dark-first UI and tests.">
+<title>enderlitplayer: A minimal desktop player for local music libraries. 2.0 is a full rewrite with a dark-first UI and tests.</title>
+<style>.f{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans',Helvetica,Arial,sans-serif}.mono{font-family:ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace}.t{fill:#1f2328}.mu{fill:#656d76}.su{fill:#6e7781}.bl{fill:#0969da}.gr{fill:#1a7f37}.num{font-variant-numeric:tabular-nums}</style>
+<rect x=".5" y=".5" width="409" height="175" rx="6" fill="#f6f8fa" stroke="#d0d7de"/>
+<g fill="none" stroke="#656d76" stroke-width="1.3" stroke-linejoin="round"><path d="M22 33V22.5a1.5 1.5 0 0 1 1.5-1.5H33v10H23.5a1.5 1.5 0 0 0-1.5 1.5a1.5 1.5 0 0 0 1.5 1.5H26"/><path d="M28 32.5v3l1.3-1 1.3 1v-3"/></g>
+<text x="42.0" y="33.0" class="f bl" font-size="15.5" font-weight="600">Enderlit Player</text>
+<rect x="341.1" y="18.0" width="48.9" height="20" rx="10" fill="none" stroke="#656d76"/>
+<text x="365.6" y="32.0" class="f" font-size="12" font-weight="500" text-anchor="middle" fill="#656d76">Public</text>
+<text x="20.0" y="64.0" class="f mu" font-size="13.5">A minimal desktop player for local music libraries. 2.0 is a full</text>
+<text x="20.0" y="84.0" class="f mu" font-size="13.5">rewrite with a dark-first UI and tests.</text>
+<circle cx="26" cy="151.5" r="6" fill="#3572A5"/>
+<text x="38.0" y="156.0" class="f mu" font-size="13">Python</text>
+<polygon points="101.74,143.50 99.76,148.27 94.61,148.68 98.53,152.04 97.33,157.07 101.74,154.38 106.15,157.07 104.95,152.04 108.87,148.68 103.72,148.27" fill="none" stroke="#656d76" stroke-width="1.3" stroke-linejoin="round"/>
+<text x="114.7" y="156.0" class="f mu num" font-size="13">0</text>
+<text x="390.0" y="156.0" class="mono mu" font-size="12" text-anchor="end">v2.0.0</text>
+<g fill="none" stroke="#656d76" stroke-width="1.3" stroke-linejoin="round"><path d="M327.8 146.5v5l7 7 5-5-7-7z"/><circle cx="331.1" cy="149.8" r=".9"/></g>
+</svg>

@@ -1,0 +1,47 @@
+name: Refresh profile
+
+on:
+  schedule:
+    - cron: "23 3 * * *"   # daily, 03:23 UTC
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/**"
+      - "README.md"
+      - ".github/workflows/refresh.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-profile
+  cancel-in-progress: true
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Render panels
+        env:
+          # STATS_TOKEN (optional): a token of the profile owner with read access to
+          # private repos. Without it only public data is used.
+          GH_TOKEN: ${{ secrets.STATS_TOKEN || secrets.GITHUB_TOKEN }}
+          GH_USER: ${{ github.repository_owner }}
+          PROFILE_TZ: ${{ vars.PROFILE_TZ || 'UTC' }}
+        run: python3 scripts/generate.py
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets README.md
+          if git diff --cached --quiet; then
+            echo "No changes."
+          else
+            git commit -m "chore: refresh profile stats"
+            git push
+          fi

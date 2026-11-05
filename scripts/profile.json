@@ -1,0 +1,49 @@
+{
+  "_comment": "Hand-written copy for the project cards. Every number shown on the cards is fetched live; only these texts are static. Facts are taken from each project's own README.",
+  "featured": [
+    {
+      "repo": "P3P3DS",
+      "kicker": "C++ · static recompilation · New 3DS",
+      "tagline": "Persona 3 Portable, running natively on the New Nintendo 3DS.",
+      "facts": [
+        "The whole PSP executable is statically recompiled into 237 C++ units",
+        "Playable early: 28–30 fps in the field, 16–25 fps in battle, saves work",
+        "Known issues are tracked in the open. No game data ships in the repo"
+      ]
+    },
+    {
+      "repo": "BYDLO",
+      "kicker": "C# · Avalonia · Windows / Linux / macOS",
+      "tagline": "One app, every protocol. A GUI launcher for VPN and proxy engines.",
+      "facts": [
+        "Drives sing-box, Xray, WireGuard, AmneziaWG and OpenVPN from one UI",
+        "Imports links, subscriptions, .conf / .ovpn files and QR codes",
+        "Built-in Zapret and tg-ws-proxy, encrypted secrets, TUN mode"
+      ]
+    }
+  ],
+  "more": [
+    {
+      "repo": "AnimeBox",
+      "kicker": "Python · FastAPI · React",
+      "desc": "A local anime library: parallel multi-source search, voiceover choice and offline downloads. No account, no cloud."
+    },
+    {
+      "repo": "ZeldaWWHDRecomp-Deck",
+      "name": "WW HD Recomp · Deck",
+      "kicker": "C++ · Vulkan · Steam Deck",
+      "desc": "Steam Deck fork of ZeldaWWHDRecomp, chasing stable 60 fps, steady frame pacing and lower power draw."
+    },
+    {
+      "repo": "enderlitplayer",
+      "name": "Enderlit Player",
+      "kicker": "Python · Qt",
+      "desc": "A minimal desktop player for local music libraries. 2.0 is a full rewrite with a dark-first UI and tests."
+    },
+    {
+      "repo": "3Dropia",
+      "kicker": "Python · Windows",
+      "desc": "Drag files in, press send: a tiny frontend for FBI Remote Install that pushes .cia / .3dsx to a 3DS over LAN."
+    }
+  ]
+}
