@@ -1,5 +1,7 @@
 name: Refresh profile
 
+# No pull_request / pull_request_target triggers: PRs (including from forks)
+# can never start this workflow, so they can never reach STATS_TOKEN.
 on:
   schedule:
     - cron: "23 3 * * *"   # daily, 03:23 UTC
@@ -8,11 +10,10 @@ on:
     branches: [main]
     paths:
       - "scripts/**"
-      - "README.md"
       - ".github/workflows/refresh.yml"
 
 permissions:
-  contents: write
+  contents: write          # only to commit the regenerated SVGs
 
 concurrency:
   group: refresh-profile
@@ -20,15 +21,19 @@ concurrency:
 
 jobs:
   refresh:
+    # Never run in forks or on other branches.
+    if: github.repository == 'endercodezz/endercodezz' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v5
+      # Pinned to a commit SHA (v7.0.1). This step does not see STATS_TOKEN.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
       - name: Render panels
+        # The secret is scoped to this single step, which runs only our own
+        # stdlib script: no third-party code ever sees it. GitHub masks it in
+        # logs; the script never prints it and aborts if it appears in output.
         env:
-          # STATS_TOKEN (optional): a token of the profile owner with read access to
-          # private repos. Without it only public data is used.
           GH_TOKEN: ${{ secrets.STATS_TOKEN || secrets.GITHUB_TOKEN }}
           GH_USER: ${{ github.repository_owner }}
           PROFILE_TZ: ${{ vars.PROFILE_TZ || 'UTC' }}

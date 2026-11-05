@@ -717,7 +717,10 @@ def leak_check(files: dict[str, str], secrets: set[str]) -> None:
     The message never says which secret matched (Actions logs are public).
     """
     needles = [s.lower() for s in secrets if len(s) >= 3]
+    token_shape = re.compile(r"\b(gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,})")
     for fname, content in files.items():
+        if (TOKEN and TOKEN in content) or token_shape.search(content):
+            sys.exit(f"leak check failed in {fname}: a token was found; nothing was written")
         hay = content.lower()
         for s in needles:
             if re.search(r"(?<![a-z0-9])" + re.escape(s) + r"(?![a-z0-9])", hay):
