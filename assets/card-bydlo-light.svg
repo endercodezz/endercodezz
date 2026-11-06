@@ -20,11 +20,11 @@
 <polygon points="81.82,188.50 79.84,193.27 74.69,193.68 78.61,197.04 77.41,202.07 81.82,199.38 86.23,202.07 85.03,197.04 88.95,193.68 83.80,193.27" fill="none" stroke="#656d76" stroke-width="1.3" stroke-linejoin="round"/>
 <text x="94.8" y="201.0" class="f mu num" font-size="13">34</text>
 <g fill="none" stroke="#656d76" stroke-width="1.3" stroke-linecap="round"><circle cx="131.44" cy="191" r="1.8"/><circle cx="138.44" cy="191" r="1.8"/><circle cx="134.94" cy="201" r="1.8"/><path d="M131.44 193v1.5a2 2 0 0 0 2 2h3a2 2 0 0 0 2-2V193M134.94 196.5v2.7"/></g>
-<text x="146.9" y="201.0" class="f mu num" font-size="13">1</text>
-<text x="173.0" y="201.0" class="f mu num" font-size="13">186 commits</text>
+<text x="146.9" y="201.0" class="f mu num" font-size="13">2</text>
+<text x="173.0" y="201.0" class="f mu num" font-size="13">209 commits</text>
 <text x="267.7" y="201.0" class="f mu num" font-size="13">4 releases</text>
-<text x="345.2" y="201.0" class="f mu num" font-size="13">77 downloads</text>
-<text x="816.0" y="201.0" class="f mu" font-size="13" text-anchor="end">v0.4.0 · today</text>
-<rect x="677.3" y="187.0" width="48.9" height="20" rx="10" fill="none" stroke="#1a7f37"/>
-<text x="701.7" y="201.0" class="f" font-size="12" font-weight="500" text-anchor="middle" fill="#1a7f37">Latest</text>
+<text x="345.2" y="201.0" class="f mu num" font-size="13">80 downloads</text>
+<text x="816.0" y="201.0" class="f mu" font-size="13" text-anchor="end">v0.4.0 · yesterday</text>
+<rect x="653.4" y="187.0" width="48.9" height="20" rx="10" fill="none" stroke="#1a7f37"/>
+<text x="677.8" y="201.0" class="f" font-size="12" font-weight="500" text-anchor="middle" fill="#1a7f37">Latest</text>
 </svg>
