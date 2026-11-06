@@ -21,7 +21,7 @@
 <text x="101.6" y="201.0" class="f mu num" font-size="13">60</text>
 <g fill="none" stroke="#8b949e" stroke-width="1.3" stroke-linecap="round"><circle cx="138.2" cy="191" r="1.8"/><circle cx="145.2" cy="191" r="1.8"/><circle cx="141.7" cy="201" r="1.8"/><path d="M138.2 193v1.5a2 2 0 0 0 2 2h3a2 2 0 0 0 2-2V193M141.7 196.5v2.7"/></g>
 <text x="153.7" y="201.0" class="f mu num" font-size="13">4</text>
-<text x="179.8" y="201.0" class="f mu num" font-size="13">161 commits</text>
+<text x="179.8" y="201.0" class="f mu num" font-size="13">169 commits</text>
 <text x="274.5" y="201.0" class="f mu num" font-size="13">14 releases</text>
 <text x="360.1" y="201.0" class="f mu num" font-size="13">555 downloads</text>
 <text x="816.0" y="201.0" class="f mu" font-size="13" text-anchor="end">v0.3.3 · today</text>

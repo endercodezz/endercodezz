@@ -23,7 +23,7 @@
 <text x="146.9" y="201.0" class="f mu num" font-size="13">2</text>
 <text x="173.0" y="201.0" class="f mu num" font-size="13">210 commits</text>
 <text x="267.7" y="201.0" class="f mu num" font-size="13">5 releases</text>
-<text x="345.2" y="201.0" class="f mu num" font-size="13">114 downloads</text>
+<text x="345.2" y="201.0" class="f mu num" font-size="13">115 downloads</text>
 <text x="816.0" y="201.0" class="f mu" font-size="13" text-anchor="end">v0.4.1 · today</text>
 <rect x="677.3" y="187.0" width="48.9" height="20" rx="10" fill="none" stroke="#3fb950"/>
 <text x="701.7" y="201.0" class="f" font-size="12" font-weight="500" text-anchor="middle" fill="#3fb950">Latest</text>
