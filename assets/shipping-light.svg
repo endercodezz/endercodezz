@@ -1,37 +1,37 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="840" height="356" viewBox="0 0 840 356" role="img" aria-label="25 releases and 662 downloads since Aug 2026">
-<title>25 releases and 662 downloads since Aug 2026</title>
+<svg xmlns="http://www.w3.org/2000/svg" width="840" height="320" viewBox="0 0 840 320" role="img" aria-label="22 releases and 654 downloads since Aug 2026">
+<title>22 releases and 654 downloads since Aug 2026</title>
 <style>.f{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans',Helvetica,Arial,sans-serif}.mono{font-family:ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace}.t{fill:#1f2328}.mu{fill:#656d76}.su{fill:#6e7781}.bl{fill:#0969da}.gr{fill:#1a7f37}.num{font-variant-numeric:tabular-nums}</style>
-<rect x=".5" y=".5" width="839" height="355" rx="6" fill="#f6f8fa" stroke="#d0d7de"/>
+<rect x=".5" y=".5" width="839" height="319" rx="6" fill="#f6f8fa" stroke="#d0d7de"/>
 <text x="20.0" y="34.0" class="f t" font-size="16" font-weight="600">Releases</text>
 <line x1="1" y1="54.5" x2="839" y2="54.5" stroke="#d0d7de"/>
-<text x="820.0" y="34.0" class="f mu" font-size="12.5" text-anchor="end">25 published since Aug 2026 · 662 asset downloads</text>
+<text x="820.0" y="34.0" class="f mu" font-size="12.5" text-anchor="end">22 published since Aug 2026 · 654 asset downloads</text>
 <text x="730.0" y="82.0" class="f mu" font-size="12" text-anchor="end">releases</text>
 <text x="820.0" y="82.0" class="f mu" font-size="12" text-anchor="end">downloads</text>
-<line x1="196.0" y1="92" x2="196.0" y2="312" stroke="#d8dee4"/>
-<text x="200.0" y="332.0" class="f mu" font-size="12">Aug 2026</text>
-<line x1="344.3" y1="92" x2="344.3" y2="312" stroke="#d8dee4"/>
-<text x="348.3" y="332.0" class="f mu" font-size="12">Sep</text>
-<line x1="487.8" y1="92" x2="487.8" y2="312" stroke="#d8dee4"/>
-<text x="491.8" y="332.0" class="f mu" font-size="12">Oct</text>
-<line x1="636.0" y1="92" x2="636.0" y2="312" stroke="#d8dee4"/>
-<text x="640.0" y="332.0" class="f mu" font-size="12">Nov</text>
+<line x1="196.0" y1="92" x2="196.0" y2="276" stroke="#d8dee4"/>
+<text x="200.0" y="296.0" class="f mu" font-size="12">Aug 2026</text>
+<line x1="344.3" y1="92" x2="344.3" y2="276" stroke="#d8dee4"/>
+<text x="348.3" y="296.0" class="f mu" font-size="12">Sep</text>
+<line x1="487.7" y1="92" x2="487.7" y2="276" stroke="#d8dee4"/>
+<text x="491.7" y="296.0" class="f mu" font-size="12">Oct</text>
+<line x1="636.0" y1="92" x2="636.0" y2="276" stroke="#d8dee4"/>
+<text x="640.0" y="296.0" class="f mu" font-size="12">Nov</text>
 <circle cx="26" cy="114.0" r="5" fill="#0969da"/>
 <text x="40.0" y="118.5" class="f t" font-size="13.5" font-weight="600">P3P3DS</text>
-<line x1="492.2" y1="114.0" x2="659.6" y2="114.0" stroke="#0969da" stroke-opacity=".5" stroke-width="2"/>
+<line x1="492.2" y1="114.0" x2="659.5" y2="114.0" stroke="#0969da" stroke-opacity=".5" stroke-width="2"/>
 <circle cx="492.2" cy="114.0" r="5" fill="#0969da" stroke="#f6f8fa" stroke-width="2"/>
 <circle cx="495.3" cy="114.0" r="5" fill="#0969da" stroke="#f6f8fa" stroke-width="2"/>
-<circle cx="496.3" cy="114.0" r="5" fill="#0969da" stroke="#f6f8fa" stroke-width="2"/>
+<circle cx="496.2" cy="114.0" r="5" fill="#0969da" stroke="#f6f8fa" stroke-width="2"/>
 <circle cx="496.6" cy="114.0" r="5" fill="#0969da" stroke="#f6f8fa" stroke-width="2"/>
-<circle cx="497.3" cy="114.0" r="5" fill="#0969da" stroke="#f6f8fa" stroke-width="2"/>
+<circle cx="497.2" cy="114.0" r="5" fill="#0969da" stroke="#f6f8fa" stroke-width="2"/>
 <circle cx="500.5" cy="114.0" r="5" fill="#0969da" stroke="#f6f8fa" stroke-width="2"/>
-<circle cx="504.2" cy="114.0" r="5" fill="#0969da" stroke="#f6f8fa" stroke-width="2"/>
-<circle cx="510.6" cy="114.0" r="5" fill="#0969da" stroke="#f6f8fa" stroke-width="2"/>
+<circle cx="504.1" cy="114.0" r="5" fill="#0969da" stroke="#f6f8fa" stroke-width="2"/>
+<circle cx="510.5" cy="114.0" r="5" fill="#0969da" stroke="#f6f8fa" stroke-width="2"/>
 <circle cx="511.2" cy="114.0" r="5" fill="#0969da" stroke="#f6f8fa" stroke-width="2"/>
 <circle cx="530.5" cy="114.0" r="5" fill="#0969da" stroke="#f6f8fa" stroke-width="2"/>
 <circle cx="538.2" cy="114.0" r="5" fill="#0969da" stroke="#f6f8fa" stroke-width="2"/>
 <circle cx="539.2" cy="114.0" r="5" fill="#0969da" stroke="#f6f8fa" stroke-width="2"/>
-<circle cx="655.1" cy="114.0" r="5" fill="#0969da" stroke="#f6f8fa" stroke-width="2"/>
-<circle cx="659.6" cy="114.0" r="5" fill="#0969da" stroke="#f6f8fa" stroke-width="2"/>
+<circle cx="655.0" cy="114.0" r="5" fill="#0969da" stroke="#f6f8fa" stroke-width="2"/>
+<circle cx="659.5" cy="114.0" r="5" fill="#0969da" stroke="#f6f8fa" stroke-width="2"/>
 <text x="730.0" y="118.5" class="f t num" font-size="13.5" font-weight="600" text-anchor="end">14</text>
 <text x="820.0" y="118.5" class="f mu num" font-size="13.5" text-anchor="end">527</text>
 <line x1="20" y1="132.0" x2="820" y2="132.0" stroke="#d8dee4"/>
@@ -54,23 +54,14 @@
 <text x="820.0" y="190.5" class="f mu num" font-size="13.5" text-anchor="end">34</text>
 <line x1="20" y1="204.0" x2="820" y2="204.0" stroke="#d8dee4"/>
 <circle cx="26" cy="222.0" r="5" fill="#1a7f37"/>
-<text x="40.0" y="226.5" class="f t" font-size="13.5" font-weight="600">WW HD Recomp · Deck</text>
-<line x1="519.1" y1="222.0" x2="519.7" y2="222.0" stroke="#1a7f37" stroke-opacity=".5" stroke-width="2"/>
-<circle cx="519.1" cy="222.0" r="5" fill="#1a7f37" stroke="#f6f8fa" stroke-width="2"/>
-<circle cx="519.6" cy="222.0" r="5" fill="#1a7f37" stroke="#f6f8fa" stroke-width="2"/>
-<circle cx="519.7" cy="222.0" r="5" fill="#1a7f37" stroke="#f6f8fa" stroke-width="2"/>
-<text x="730.0" y="226.5" class="f t num" font-size="13.5" font-weight="600" text-anchor="end">3</text>
-<text x="820.0" y="226.5" class="f mu num" font-size="13.5" text-anchor="end">8</text>
+<text x="40.0" y="226.5" class="f t" font-size="13.5" font-weight="600">Enderlit Player</text>
+<circle cx="536.3" cy="222.0" r="5" fill="#1a7f37" stroke="#f6f8fa" stroke-width="2"/>
+<text x="730.0" y="226.5" class="f t num" font-size="13.5" font-weight="600" text-anchor="end">1</text>
+<text x="820.0" y="226.5" class="f mu num" font-size="13.5" text-anchor="end">3</text>
 <line x1="20" y1="240.0" x2="820" y2="240.0" stroke="#d8dee4"/>
 <circle cx="26" cy="258.0" r="5" fill="#bf3989"/>
-<text x="40.0" y="262.5" class="f t" font-size="13.5" font-weight="600">Enderlit Player</text>
-<circle cx="536.3" cy="258.0" r="5" fill="#bf3989" stroke="#f6f8fa" stroke-width="2"/>
+<text x="40.0" y="262.5" class="f t" font-size="13.5" font-weight="600">3Dropia</text>
+<circle cx="482.6" cy="258.0" r="5" fill="#bf3989" stroke="#f6f8fa" stroke-width="2"/>
 <text x="730.0" y="262.5" class="f t num" font-size="13.5" font-weight="600" text-anchor="end">1</text>
-<text x="820.0" y="262.5" class="f mu num" font-size="13.5" text-anchor="end">3</text>
-<line x1="20" y1="276.0" x2="820" y2="276.0" stroke="#d8dee4"/>
-<circle cx="26" cy="294.0" r="5" fill="#bc4c00"/>
-<text x="40.0" y="298.5" class="f t" font-size="13.5" font-weight="600">3Dropia</text>
-<circle cx="482.6" cy="294.0" r="5" fill="#bc4c00" stroke="#f6f8fa" stroke-width="2"/>
-<text x="730.0" y="298.5" class="f t num" font-size="13.5" font-weight="600" text-anchor="end">1</text>
-<text x="820.0" y="298.5" class="f mu num" font-size="13.5" text-anchor="end">10</text>
+<text x="820.0" y="262.5" class="f mu num" font-size="13.5" text-anchor="end">10</text>
 </svg>

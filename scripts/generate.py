@@ -492,6 +492,11 @@ def panel_languages(data) -> tuple[str, list]:
             colors[e["node"]["name"]] = e["node"]["color"] or T["other"]
     tot = sum(size.values()) or 1
     top = size.most_common(8)
+    # Highlighted languages (profile.json) get their own row with their real share,
+    # but only if they are present in the data.
+    shown = {n for n, _ in top}
+    top += sorted(((n, size[n]) for n in CONFIG.get("language_highlight", []) if n in size and n not in shown),
+                  key=lambda x: -x[1])
     other = tot - sum(v for _, v in top)
     rows = top + ([("Other", other)] if other else [])
     colors["Other"] = T["other"]

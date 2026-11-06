@@ -29,12 +29,6 @@
       "desc": "A local anime library: parallel multi-source search, voiceover choice and offline downloads. No account, no cloud."
     },
     {
-      "repo": "ZeldaWWHDRecomp-Deck",
-      "name": "WW HD Recomp · Deck",
-      "kicker": "C++ · Vulkan · Steam Deck",
-      "desc": "Steam Deck fork of ZeldaWWHDRecomp, chasing stable 60 fps, steady frame pacing and lower power draw."
-    },
-    {
       "repo": "enderlitplayer",
       "name": "Enderlit Player",
       "kicker": "Python · Qt",
@@ -45,5 +39,10 @@
       "kicker": "Python · Windows",
       "desc": "Drag files in, press send: a tiny frontend for FBI Remote Install that pushes .cia / .3dsx to a 3DS over LAN."
     }
+  ],
+  "_language_highlight": "Languages that always get their own row in the language chart, with their real share of bytes, when they exist in the data. Never adds a language that is not there.",
+  "language_highlight": [
+    "Rust",
+    "Zig"
   ]
 }

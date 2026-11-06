@@ -5,7 +5,7 @@
   <a href="https://enderlit.com"><b>enderlit.com</b></a>&nbsp;&nbsp;·&nbsp;&nbsp;<a href="https://t.me/enderlit"><b>Telegram</b></a>&nbsp;&nbsp;·&nbsp;&nbsp;<a href="https://github.com/endercodezz?tab=repositories"><b>All repositories</b></a>
 </p>
 
-I like making software run where it was never meant to: a PSP game on a New 3DS, Wind Waker HD tuned for a Steam Deck, eleven VPN and proxy protocols behind one button. Most of my code is written together with AI agents. Every release lists its known issues, measured numbers and what is still broken.
+I like making software run where it was never meant to: a PSP game on a New 3DS, eleven VPN and proxy protocols behind one button, an anime library that keeps working offline. Most of my code is written together with AI agents. Every release lists its known issues, measured numbers and what is still broken.
 
 ## Featured
 
@@ -17,7 +17,6 @@ I like making software run where it was never meant to: a PSP game on a New 3DS,
 
 <p>
   <a href="https://github.com/endercodezz/AnimeBox"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/card-animebox-dark.svg"><source media="(prefers-color-scheme: light)" srcset="assets/card-animebox-light.svg"><img src="assets/card-animebox-dark.svg" width="49%" alt="AnimeBox: a local anime library"></picture></a>
-  <a href="https://github.com/endercodezz/ZeldaWWHDRecomp-Deck"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/card-zeldawwhdrecomp-deck-dark.svg"><source media="(prefers-color-scheme: light)" srcset="assets/card-zeldawwhdrecomp-deck-light.svg"><img src="assets/card-zeldawwhdrecomp-deck-dark.svg" width="49%" alt="ZeldaWWHDRecomp-Deck: Wind Waker HD recompilation tuned for Steam Deck"></picture></a>
   <a href="https://github.com/endercodezz/enderlitplayer"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/card-enderlitplayer-dark.svg"><source media="(prefers-color-scheme: light)" srcset="assets/card-enderlitplayer-light.svg"><img src="assets/card-enderlitplayer-dark.svg" width="49%" alt="Enderlit Player: a desktop music player"></picture></a>
   <a href="https://github.com/endercodezz/3Dropia"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/card-3dropia-dark.svg"><source media="(prefers-color-scheme: light)" srcset="assets/card-3dropia-light.svg"><img src="assets/card-3dropia-dark.svg" width="49%" alt="3Dropia: send files to a 3DS over LAN"></picture></a>
 </p>
@@ -38,21 +37,21 @@ I like making software run where it was never meant to: a PSP game on a New 3DS,
 
 | | |
 |---|---|
-| Last year | 1,066 contributions (incl. 303 private, counted anonymously) on 56 active days |
-| Breakdown | 699 commits across public and private repos · 89 public pull requests · 240 public issues |
-| Releases | 25 published since Aug 2026 · 662 asset downloads |
+| Last year | 1,058 contributions (incl. 303 private, counted anonymously) on 56 active days |
+| Breakdown | 693 commits across public and private repos · 88 public pull requests · 240 public issues |
+| Releases | 22 published since Aug 2026 · 654 asset downloads |
 | Commit rhythm | busiest hour Mon 18:00 UTC · 16% between 00:00 and 06:00 UTC · 31% on weekends |
-| Languages | C++ 46.2% · C# 19.2% · Python 15.0% · C 5.4% · TypeScript 5.0% · Objective-C++ 3.1% · HTML 1.7% · JavaScript 1.0% · Other 3.4% |
+| Languages | C++ 40.8% · C# 24.4% · Python 14.5% · C 6.5% · TypeScript 6.4% · HTML 2.2% · JavaScript 1.2% · PowerShell 0.7% · Rust 0.4% · Zig 0.2% · Other 2.6% |
 
-<sub>Generated 2026-11-06 00:10 UTC from the GitHub API.</sub>
+<sub>Generated 2026-11-06 00:23 UTC from the GitHub API.</sub>
 </details>
 <!-- numbers:end -->
 
 ## Toolbox
 
-**Languages:** C++ · C# · Python · TypeScript · C<br>
+**Languages:** C++ · C# · Python · TypeScript · C · Rust · Zig<br>
 **Frameworks:** .NET / Avalonia · Qt · FastAPI · React + Vite<br>
 **Builds:** CMake · devkitARM · GitHub Actions CI and releases<br>
-**Targets:** Windows · Linux · macOS · New Nintendo 3DS · Steam Deck
+**Targets:** Windows · Linux · macOS · New Nintendo 3DS
 
 <sub>Every chart on this page is redrawn every 3 hours (00:00, 03:00 … 21:00 UTC) by <a href=".github/workflows/refresh.yml">a workflow in this repo</a> from the GitHub API. No time trackers and no third-party stat services. Private repositories count toward the totals and are never named.</sub>
