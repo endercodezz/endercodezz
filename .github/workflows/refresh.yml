@@ -1,7 +1,7 @@
 name: Refresh profile
 
 # No pull_request / pull_request_target triggers: PRs (including from forks)
-# can never start this workflow, so they can never reach STATS_TOKEN.
+# can never start this workflow, so they can never reach either provider token.
 on:
   schedule:
     - cron: "0 */3 * * *"   # every 3 hours: 00:00, 03:00 ... 21:00 UTC (GitHub may start it a few minutes late)
@@ -25,9 +25,9 @@ jobs:
     # Never run in forks or on other branches.
     if: github.repository == 'endercodezz/endercodezz' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 30
     steps:
-      # Pinned to a commit SHA (v7.0.1). This step does not see STATS_TOKEN.
+      # Pinned to a commit SHA (v7.0.1). This step sees neither provider token.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
       - name: Unit tests
@@ -40,6 +40,8 @@ jobs:
         # logs; the script never prints it and aborts if it appears in output.
         env:
           GH_TOKEN: ${{ secrets.STATS_TOKEN || secrets.GITHUB_TOKEN }}
+          GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
+          GITEA_MIRRORS: ${{ secrets.GITEA_MIRRORS }}
           GH_USER: ${{ github.repository_owner }}
           PROFILE_TZ: ${{ vars.PROFILE_TZ || 'UTC' }}
         run: python3 scripts/generate.py

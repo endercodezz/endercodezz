@@ -35,11 +35,13 @@ from collections import Counter, defaultdict
 from html import escape
 from pathlib import Path
 from zoneinfo import ZoneInfo
+import gitea_stats
 
 ROOT = Path(__file__).resolve().parent.parent
 ASSETS = ROOT / "assets"
 USER = os.environ.get("GH_USER", "endercodezz")
 TOKEN = os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
+GITEA_TOKEN = os.environ.get("GITEA_TOKEN")
 TZ = ZoneInfo(os.environ.get("PROFILE_TZ") or "UTC")
 NOW = dt.datetime.now(dt.timezone.utc)
 # Shown next to every hour of day: the rhythm is computed in this zone.
@@ -147,7 +149,8 @@ PRIVATE_Q = """
 query($after: String) {
   viewer {
     repositories(first: 40, after: $after, privacy: PRIVATE,
-                 affiliations: [OWNER, COLLABORATOR, ORGANIZATION_MEMBER]) {
+                 affiliations: [OWNER, COLLABORATOR, ORGANIZATION_MEMBER],
+                 ownerAffiliations: [OWNER, COLLABORATOR, ORGANIZATION_MEMBER]) {
       pageInfo { hasNextPage endCursor }
       nodes {
         name description url isFork owner { login }
@@ -164,8 +167,10 @@ HISTORY_Q = """
 query($owner: String!, $name: String!, $author: ID!, $after: String) {
   repository(owner: $owner, name: $name) {
     defaultBranchRef { target { ... on Commit {
+      allCommits: history(first: 1) { totalCount }
       history(first: 100, after: $after, author: {id: $author}) {
-        totalCount pageInfo { hasNextPage endCursor } nodes { oid authoredDate }
+        totalCount pageInfo { hasNextPage endCursor }
+        nodes { oid authoredDate author { user { id } } }
       }
     } } }
   }
@@ -193,23 +198,35 @@ query($login: String!, $after: String) {
 ALLTIME_Q = """
 query($owner: String!, $name: String!, $author: ID!) {
   repository(owner: $owner, name: $name) {
-    defaultBranchRef { target { ... on Commit { history(first: 1, author: {id: $author}) { totalCount } } } }
+    defaultBranchRef { target { ... on Commit {
+      yours: history(first: 1, author: {id: $author}) { totalCount }
+      total: history(first: 1) { totalCount }
+    } } }
   }
 }"""
 
 
 def my_commits_in(repo: str, author: str, owner: str = USER,
-                  private: bool = False) -> list[tuple[str, dt.datetime]]:
+                  private: bool = False, totals: dict | None = None) -> list[tuple[str, dt.datetime]]:
     """(sha, authored date) of every commit I authored on the default branch.
     Paginated; a repository that is gone, unreadable or empty yields []."""
+    # The filter is discovery, not permission to attribute every returned diff.
+    # Require the primary git author to resolve to this GitHub account; a
+    # co-author trailer or a matching display name is insufficient.
     out, after = [], None
     while True:
         d = gql(HISTORY_Q, private=private, missing_ok=True, owner=owner, name=repo, author=author, after=after)
         ref = (d.get("repository") or {}).get("defaultBranchRef")
         if not ref:
+            if totals is not None and d.get("repository"):
+                totals[f"{owner}/{repo}".lower()] = 0
             return out
+        if totals is not None:
+            totals[f"{owner}/{repo}".lower()] = ref["target"]["allCommits"]["totalCount"]
         h = ref["target"]["history"]
-        out += [(n["oid"], dt.datetime.fromisoformat(n["authoredDate"].replace("Z", "+00:00"))) for n in h["nodes"]]
+        out += [(n["oid"], dt.datetime.fromisoformat(n["authoredDate"].replace("Z", "+00:00")))
+                for n in h["nodes"]
+                if ((n.get("author") or {}).get("user") or {}).get("id") == author]
         if not h["pageInfo"]["hasNextPage"]:
             return out
         after = h["pageInfo"]["endCursor"]
@@ -223,7 +240,8 @@ def external_repos() -> list[dict]:
     (e.g. bots that push empty commits "authored" by other users)."""
     found, after = {}, None
     while True:
-        u = gql(EXTERNAL_Q, missing_ok=True, login=USER, after=after).get("user") or {}
+        # Errors can contain private repository metadata, even before discovery.
+        u = gql(EXTERNAL_Q, private=True, missing_ok=True, login=USER, after=after).get("user") or {}
         nodes = list((u.get("repositoriesContributedTo") or {}).get("nodes") or [])
         if after is None:
             nodes += [c["repository"] for c in
@@ -277,11 +295,27 @@ def language_of(path: str) -> str | None:
 
 def added_bytes(patch: str) -> int:
     """Bytes of the lines a diff adds (what I wrote), not the whole file."""
-    return sum(len(line[1:].encode()) + 1 for line in patch.splitlines()
-               if line.startswith("+") and not line.startswith("+++"))
+    total, in_hunk, added = 0, False, False
+    # Git patches delimit lines with LF. str.splitlines() also splits control
+    # characters and Unicode separators inside source, dropping added bytes.
+    for line in patch.split("\n"):
+        if line.startswith("@@"):
+            in_hunk = True
+        if line.startswith("\\ No newline at end of file"):
+            if added:
+                total -= 1
+            added = False
+            continue
+        # A +++ file header is metadata only before the first hunk. Inside a
+        # hunk, ++ at the start of source code is an ordinary added line.
+        added = line.startswith("+") and (in_hunk or not line.startswith("+++ "))
+        if added:
+            total += len(line[1:].encode()) + 1
+    return total
 
 
-def commit_languages(owner: str, name: str, sha: str, private: bool, stats: Counter) -> Counter:
+def commit_languages(owner: str, name: str, sha: str, private: bool, stats: Counter,
+                     secrets: set[str] | None = None) -> Counter:
     """Language -> bytes I added in one commit. Paginates the file list. Files
     without a textual patch (binary, or too large for the API) are counted in
     stats['unmeasured'] and contribute nothing rather than an estimate."""
@@ -298,6 +332,8 @@ def commit_languages(owner: str, name: str, sha: str, private: bool, stats: Coun
             return out
         files = c.get("files") or []
         for f in files:
+            if private and secrets is not None:
+                secrets.update(filter(None, (f["filename"], f.get("previous_filename"))))
             lang = language_of(f["filename"])
             if not lang or f.get("status") == "removed":
                 continue
@@ -310,10 +346,18 @@ def commit_languages(owner: str, name: str, sha: str, private: bool, stats: Coun
     return out
 
 
-def my_commit_count(repo: str, author: str) -> int:
+def repo_commit_counts(repo: str, author: str) -> tuple[int, int]:
+    """Personal and all-author counts on the same default-branch tip, in one call."""
     d = gql(ALLTIME_Q, owner=USER, name=repo, author=author)
     ref = (d["repository"] or {}).get("defaultBranchRef")
-    return ref["target"]["history"]["totalCount"] if ref else 0
+    if not ref:
+        return 0, 0
+    counts = ref["target"]
+    return counts["yours"]["totalCount"], counts["total"]["totalCount"]
+
+
+def my_commit_count(repo: str, author: str) -> int:
+    return repo_commit_counts(repo, author)[0]
 
 
 # ---------------------------------------------------------------- data
@@ -335,7 +379,9 @@ def collect():
     sources.setdefault(f"{USER}/{USER}".lower(), (USER, USER, False, "own"))
 
     tracked = {p["repo"] for p in CONFIG["featured"] + CONFIG["more"]}
-    my_commits = {r["name"]: my_commit_count(r["name"], author) for r in repos if r["name"] in tracked}
+    commit_counts = {r["name"]: repo_commit_counts(r["name"], author) for r in repos if r["name"] in tracked}
+    my_commits = {name: counts[0] for name, counts in commit_counts.items()}
+    total_commits = {name: counts[1] for name, counts in commit_counts.items()}
 
     def releases_of(r, label):
         out = []
@@ -391,29 +437,61 @@ def collect():
     commits: dict[str, dt.datetime] = {}
     own_shas: set[str] = set()
     foreign: dict[str, tuple[str, str, bool]] = {}
+    repository_totals = {}
     for owner, name, private, kind in sources.values():
-        for sha, when in my_commits_in(name, author, owner=owner, private=private):
+        for sha, when in my_commits_in(name, author, owner=owner, private=private, totals=repository_totals):
+            if private:
+                secrets.add(sha)
             commits.setdefault(sha, when)
             if kind == "own":
                 own_shas.add(sha)
             else:
                 foreign.setdefault(sha, (owner, name, private))
-    times = [t for t in commits.values() if t >= since]
+    try:
+        gitea = gitea_stats.collect(GITEA_TOKEN, sources, set(commits), own_shas,
+                                  language_of, added_bytes, secrets)
+    except Exception:
+        raise SystemExit("Gitea collection failed; private diagnostics suppressed; nothing was written") from None
+    if gitea["status"] == "authenticated":
+        print(f"Gitea: authenticated; {gitea['raw']['repositories']} private repositories, "
+              f"{gitea['raw']['personal_commits']} personal commits, "
+              f"{gitea['included']['repositories']} canonical repositories included, "
+              f"{gitea['mirrors_excluded']} mirrors excluded; "
+              f"{sum(gitea['languages'].values())} language bytes included")
+    else:
+        print("Gitea: GITEA_TOKEN missing; publishing explicitly GitHub-only statistics")
+    times = [t for t in {**gitea["times"], **commits}.values() if t >= since]
 
     # Languages of my code in forks and other people's repos: bytes my commits add.
     # A commit that also lives in one of my own repos is already in Linguist's numbers.
     contrib_langs, lang_stats = Counter(), Counter()
     for sha, (owner, name, private) in foreign.items():
-        if sha in own_shas:
+        if sha in own_shas or sha in gitea["own_shas"]:
             continue
         lang_stats["commits"] += 1
-        contrib_langs.update(commit_languages(owner, name, sha, private, lang_stats))
+        contrib_langs.update(commit_languages(owner, name, sha, private, lang_stats, secrets))
     print(f"my code in forks and other repos: {lang_stats['commits']} commits, "
           f"{sum(contrib_langs.values())} bytes added, {lang_stats['unmeasured']} files without a diff, "
           f"{lang_stats['merges']} merges skipped, {lang_stats['unavailable']} commits unavailable")
+    github_languages = Counter(contrib_langs)
+    for edges in [r["languages"]["edges"] for r in repos if not r["isFork"]] + private_langs:
+        github_languages.update({e["node"]["name"]: e["size"] for e in edges})
+    providers = {"github": {"repositories": len(repository_totals), "personal_commits": len(commits),
+        "total_repository_commits": sum(repository_totals.values()), "language_bytes": dict(github_languages),
+        "releases": len(releases), "downloads": sum(r["downloads"] for r in releases)},
+        "gitea": {key: gitea[key] for key in ("status", "raw", "included")}}
+    # Keep GitHub's calendar unchanged: Gitea activity has its own dated counters,
+    # while the commit rhythm, language shares and shipping totals combine both.
+    providers["gitea"]["activity"] = dict(sorted(Counter(t.date().isoformat() for t in gitea["times"].values()).items()))
+    providers["gitea"]["mirrors_excluded"] = gitea.get("mirrors_excluded", 0)
+    providers["gitea"]["diagnostics"] = gitea.get("diagnostics", {})
+    contrib_langs.update(gitea["languages"])
+    releases += gitea["releases"]
     return {"cc": d["contributionsCollection"], "repos": repos, "times": times,
-            "my_commits": my_commits, "releases": releases, "private_langs": private_langs,
-            "contrib_langs": contrib_langs, "has_private": has_private, "secrets": secrets}
+            "my_commits": my_commits, "total_commits": total_commits,
+            "releases": releases, "private_langs": private_langs,
+            "contrib_langs": contrib_langs, "has_private": has_private, "secrets": secrets,
+            "providers": providers}
 
 
 # ---------------------------------------------------------------- svg helpers
@@ -571,6 +649,12 @@ def color_of(repo: str) -> str:
 
 
 # ---------------------------------------------------------------- panels
+def provider_scope(data):
+    status = data.get("providers", {}).get("gitea", {}).get("status")
+    return "GitHub + Gitea" if status == "authenticated" else (
+        "GitHub only · Gitea token missing" if status == "missing_token" else "GitHub")
+
+
 def panel_header(data) -> str:
     h = 214
     rel = sorted((r for r in data["releases"] if r["repo"] != PRIVATE), key=lambda r: r["at"], reverse=True)
@@ -589,7 +673,7 @@ def panel_header(data) -> str:
              text(28, 163, "that make things run where they shouldn’t.", "f mu", 16)]
     # status-like line, the way GitHub shows a profile status
     parts += [f'<circle cx="34" cy="186" r="4" fill="{T["green"]}"/>',
-              text(46, 190, "vibe-coded · shipped in the open", "f mu", 13)]
+              text(46, 190, provider_scope(data), "f mu", 13)]
 
     # "Latest releases" list, framed like a Primer Box
     bx, by, bw = 456, 20, 364
@@ -627,7 +711,7 @@ def panel_activity(data) -> tuple[str, dict]:
     # Commits: with a private-capable token, count my commits on the default
     # branches of every repo it can read (the same set as the rhythm panel).
     # PR and issue counts from the API never include private repos.
-    full = data["has_private"]
+    full = data["has_private"] or data.get("providers", {}).get("gitea", {}).get("status") == "authenticated"
     commits = len(data["times"]) if full else cc["totalCommitContributions"]
     pre = "public " if (private or full) else ""
     items = [(fmt(total), head_label),
@@ -636,7 +720,7 @@ def panel_activity(data) -> tuple[str, dict]:
              (fmt(cc["totalIssueContributions"]), pre + "issues"), (fmt(active), "active days")]
 
     h = 336
-    parts = [box(W, h), *box_header(W, "Contributions in the last year", note),
+    parts = [box(W, h), *box_header(W, "GitHub contributions in the last year", note),
              *counters(28, 100, items, W - 40)]
 
     # heatmap, GitHub calendar geometry
@@ -697,7 +781,7 @@ def panel_languages(data) -> tuple[str, list]:
     cols = 3
     nrows = math.ceil(len(rows) / cols)
     h = 112 + nrows * 28
-    scope = "own repos, public and private" if data["has_private"] else "own public repos"
+    scope = provider_scope(data)
     parts = [box(W, h), *box_header(W, "Languages", f"share of bytes · {scope} + my commits in other repos")]
     # GitHub's repo language bar: 8px, rounded ends, hairline gaps
     bx0, bx1, by = 20, W - 20, 76
@@ -736,7 +820,7 @@ def panel_rhythm(data) -> tuple[str, dict]:
     pct = (lambda v: round(100 * v / n) if n else 0)
 
     h = 382
-    scope = "public and private repos" if data["has_private"] else "public repos"
+    scope = provider_scope(data)
     parts = [box(W, h), *box_header(W, "Commit rhythm", f"{fmt(n)} commits · {scope} · last 12 months · hours in {TZ_LABEL}"),
              *counters(28, 100, [(f"{names[wd]} {hr:02d}:00", f"busiest hour, {TZ_LABEL}"),
                                  (f"{pct(night)}%", f"between 00:00 and 06:00 {TZ_LABEL}"),
@@ -865,7 +949,9 @@ def card_featured(data, p) -> str:
         parts.append(f'<circle cx="31" cy="{y - 4.5}" r="2.5" fill="{T["subtle"]}"/>')
         parts.append(text(44, y, f, "f mu", 14))
     parts.append(f'<line x1="1" y1="{h - 52.5}" x2="{W - 1}" y2="{h - 52.5}" stroke="{T["border"]}"/>')
-    parts += card_footer(24, h - 21, r, [(fmt(data["my_commits"].get(p["repo"], 0)), "commits"),
+    counts = (f"{fmt(data['my_commits'].get(p['repo'], 0))} yours / "
+              f"{fmt(data.get('total_commits', {}).get(p['repo'], 0))}")
+    parts += card_footer(24, h - 21, r, [(counts, "total"),
                                          (len(rels), "releases"), (fmt(dl), "downloads")])
     if rels:
         right = W - 24
@@ -906,6 +992,7 @@ def export_json(data, act, langs, rhythm, ship) -> str:
             "featured": p in CONFIG["featured"], "color_index": project_order().index(p["repo"]),
             "stars": r["stargazerCount"], "forks": r["forkCount"],
             "commits": data["my_commits"].get(p["repo"], 0),
+            "total_commits": data.get("total_commits", {}).get(p["repo"], 0),
             "language": r["primaryLanguage"], "pushed": r["pushedAt"],
             "releases": len(rels), "downloads": sum(x["downloads"] for x in rels),
             "latest": {"tag": rels[0]["tag"], "at": rels[0]["at"].isoformat()} if rels else None,
@@ -929,11 +1016,12 @@ def export_json(data, act, langs, rhythm, ship) -> str:
                       "at": r["at"].isoformat(), "downloads": r["downloads"]}
                      for r in sorted(data["releases"], key=lambda r: r["at"])],
         "projects": projects, "other_repos": others,
+        "providers": data.get("providers", {}),
     }
     return json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
 
 
-def numbers_block(act, langs, rhythm, ship) -> str:
+def numbers_block(act, langs, rhythm, ship, providers=None) -> str:
     lines = ["| | |", "|---|---|"]
     tot = f"{fmt(act['total'])} {act['label']}"
     if act["private"]:
@@ -946,8 +1034,9 @@ def numbers_block(act, langs, rhythm, ship) -> str:
               f"| Commit rhythm | busiest hour {rhythm['peak']} · {rhythm['night']}% between 00:00 and 06:00 {TZ_LABEL} · {rhythm['weekend']}% on weekends |",
               "| Languages | " + " · ".join(f"{n} {p}%" for n, p, _ in langs) + " |"]
     stamp = NOW.strftime("%Y-%m-%d %H:%M UTC")
+    scope = provider_scope({"providers": providers or {}})
     return ("<details>\n<summary>The same numbers as text</summary>\n\n" + "\n".join(lines) +
-            f"\n\n<sub>Generated {stamp} from the GitHub API.</sub>\n</details>")
+            f"\n\n<sub>Generated {stamp}. Sources: {scope}. Contribution calendar: GitHub; commit rhythm, languages and releases: listed sources.</sub>\n</details>")
 
 
 def leak_check(files: dict[str, str], secrets: set[str]) -> None:
@@ -960,7 +1049,7 @@ def leak_check(files: dict[str, str], secrets: set[str]) -> None:
     for fname, content in files.items():
         # The literal token is only searched when it looks like a real one: a short
         # placeholder would match ordinary words ("test" in "Latest").
-        if (TOKEN and len(TOKEN) >= 20 and TOKEN in content) or token_shape.search(content):
+        if any(token and token in content for token in (GITEA_TOKEN, TOKEN if TOKEN and len(TOKEN) >= 20 else None)) or token_shape.search(content):
             sys.exit(f"leak check failed in {fname}: a token was found; nothing was written")
         hay = content.lower()
         for s in needles:
@@ -997,7 +1086,7 @@ def main():
 
     readme = ROOT / "README.md"
     src = readme.read_text("utf-8")
-    block = numbers_block(act, langs, rhythm, ship)
+    block = numbers_block(act, langs, rhythm, ship, data.get("providers"))
     src, n = re.subn(r"(<!-- numbers:start -->\n).*?(<!-- numbers:end -->)",
                      lambda m: m.group(1) + block + "\n" + m.group(2), src, flags=re.S)
     if n != 1:

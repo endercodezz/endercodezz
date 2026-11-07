@@ -8,6 +8,7 @@ import json
 import sys
 import unittest
 import urllib.error
+import xml.etree.ElementTree as ET
 from collections import Counter
 from pathlib import Path
 from unittest import mock
@@ -92,12 +93,14 @@ class FakeGitHub:
             if pages is None:
                 return {"repository": None}                  # what gql(missing_ok=True) yields on NOT_FOUND
             i = 0 if v["after"] is None else int(v["after"])
-            return {"repository": {"defaultBranchRef": {"target": {"history": {
+            return {"repository": {"defaultBranchRef": {"target": {"allCommits": {"totalCount": sum(map(len, pages))}, "history": {
                 "totalCount": sum(map(len, pages)),
                 "pageInfo": {"hasNextPage": i + 1 < len(pages), "endCursor": str(i + 1)},
-                "nodes": [{"oid": s, "authoredDate": d} for s, d in pages[i]]}}}}}
+                "nodes": [{"oid": s, "authoredDate": d, "author": {"user": {"id": "ME"}}}
+                          for s, d in pages[i]]}}}}}
         if query is g.ALLTIME_Q:
-            return {"repository": {"defaultBranchRef": {"target": {"history": {"totalCount": 0}}}}}
+            return {"repository": {"defaultBranchRef": {"target": {
+                "yours": {"totalCount": 7}, "total": {"totalCount": 19}}}}}
         raise AssertionError("unexpected query")
 
     def rest(self, path, private=False):
@@ -183,7 +186,7 @@ class CollectTest(unittest.TestCase):
 
     def test_rendered_output_has_no_private_names(self):
         when = g.NOW - dt.timedelta(days=3)
-        data = {**self.data, "cc": fake_cc(), "my_commits": {},
+        data = {**self.data, "cc": fake_cc(), "my_commits": {"alpha": 7}, "total_commits": {"alpha": 19},
                 "releases": [{"repo": "alpha", "tag": "v1", "at": when, "downloads": 5},
                              {"repo": g.PRIVATE, "tag": None, "at": when, "downloads": 2}]}
         config = {**g.CONFIG, "language_highlight": [], "more": [],
@@ -191,6 +194,10 @@ class CollectTest(unittest.TestCase):
         with mock.patch.object(g, "CONFIG", config):
             out, stats = g.render_all(data)
             out["stats.json"] = g.export_json(data, *stats)
+        project = json.loads(out["stats.json"])["projects"][0]
+        self.assertEqual((project["commits"], project["total_commits"]), (7, 19))
+        for theme in ("light", "dark"):
+            self.assertIn("7 yours / 19 total", out[f"card-alpha-{theme}.svg"])
         with mock.patch("sys.stdout", new_callable=io.StringIO):
             g.leak_check(out, self.data["secrets"])          # exits on any private name
 
@@ -204,7 +211,185 @@ def fake_cc():
                                      "weeks": [{"contributionDays": days[i:i + 7]} for i in range(0, 364, 7)]}}
 
 
+class FeaturedCommitTest(unittest.TestCase):
+    def counts_payload(self, yours=7, total=19):
+        return {"repository": {"defaultBranchRef": {"target": {
+            "yours": {"totalCount": yours}, "total": {"totalCount": total}}}}}
+
+    def test_counts_use_same_default_branch_with_only_personal_author_filter(self):
+        self.assertIn("defaultBranchRef", g.ALLTIME_Q)
+        self.assertIn("yours: history(first: 1, author: {id: $author})", g.ALLTIME_Q)
+        self.assertIn("total: history(first: 1) { totalCount }", g.ALLTIME_Q)
+        self.assertNotIn('ref(qualifiedName:', g.ALLTIME_Q)
+        with mock.patch.object(g, "gql", return_value=self.counts_payload()) as query:
+            self.assertEqual(g.repo_commit_counts("project", "ME"), (7, 19))
+        query.assert_called_once_with(g.ALLTIME_Q, owner=g.USER, name="project", author="ME")
+
+    def test_existing_personal_count_stays_personal(self):
+        with mock.patch.object(g, "gql", return_value=self.counts_payload()):
+            self.assertEqual(g.my_commit_count("project", "ME"), 7)
+
+    def test_empty_or_missing_repository_has_zero_counts(self):
+        for payload in ({"repository": None}, {"repository": {"defaultBranchRef": None}},
+                        self.counts_payload(0, 0)):
+            with mock.patch.object(g, "gql", return_value=payload):
+                self.assertEqual(g.repo_commit_counts("empty", "ME"), (0, 0))
+
+    def test_collection_adds_total_without_changing_existing_statistics(self):
+        gh = FakeGitHub()
+        config = {**g.CONFIG, "featured": [], "more": [], "exclude_repos": ["acidvegas/farming"]}
+        with mock.patch.object(g, "gql", gh.gql), mock.patch.object(g, "rest", gh.rest), \
+                mock.patch.object(g, "TOKEN", "test"), mock.patch("sys.stdout", new_callable=io.StringIO), \
+                mock.patch.object(g, "CONFIG", config):
+            before = g.collect()
+            config["featured"] = [{"repo": "alpha"}]
+            after = g.collect()
+        self.assertEqual(after["my_commits"], {"alpha": 7})
+        self.assertEqual(after["total_commits"], {"alpha": 19})
+        for key in before.keys() - {"my_commits", "total_commits"}:
+            self.assertEqual(before[key], after[key], key)
+        calls = [c for c in gh.calls if c[0] is g.ALLTIME_Q]
+        self.assertEqual(len(calls), 1)
+
+    def test_featured_svg_displays_both_counts_without_footer_overlap(self):
+        project = {"repo": "alpha", "kicker": "k", "tagline": "t", "facts": ["a", "b", "c"]}
+        repo = repo_node("alpha")
+        repo.update(primaryLanguage={"name": "C++", "color": "#f34b7d"}, stargazerCount=61, forkCount=4)
+        data = {"repos": [repo], "my_commits": {"alpha": 171}, "total_commits": {"alpha": 320},
+                "releases": [{"repo": "alpha", "tag": "v0.3.3", "at": g.NOW - dt.timedelta(days=2),
+                              "downloads": 599}]}
+        for theme in g.THEMES.values():
+            with mock.patch.object(g, "T", theme):
+                svg = g.card_featured(data, project)
+            self.assertIn("171 yours / 320 total", svg)
+            root = ET.fromstring(svg)
+            self.assertEqual(root.attrib["viewBox"], "0 0 840 222")
+            footer = [e for e in root.iter() if e.tag.endswith("text") and e.attrib.get("y") == "201.0"
+                      and e.attrib.get("text-anchor") != "middle"]
+            previous_end = 24
+            for e in footer:
+                x = float(e.attrib["x"])
+                if e.attrib.get("text-anchor") == "end":
+                    # Leave room for the Latest pill to the left of the tag.
+                    start = x - g.width_of(e.text, 13) - 10 - (g.width_of("Latest", 12) + 16)
+                else:
+                    start = x
+                self.assertGreaterEqual(start, previous_end)
+                previous_end = x + g.width_of(e.text, 13)
+
+
+class PrivateExternalTest(unittest.TestCase):
+    """Synthetic data only: no identifiers or code from a real private repo."""
+
+    def collect_private(self, accessible=True, contributed=False, affiliated=True):
+        gh = FakeGitHub()
+        base = gh.gql
+        project = {**repo_node("hidden-project"), **ext("outside-user", "hidden-project", True)}
+        shas = [f"{i:040x}" for i in range(10, 16)]
+
+        def gql(query, private=False, missing_ok=False, **v):
+            if query is g.PRIVATE_Q:
+                # An unrelated private project on page one; the external project
+                # must be found on page two even if contribution discovery omits it.
+                if v["after"] is None:
+                    result = base(query, private=private, missing_ok=missing_ok, **v)
+                    result["viewer"]["repositories"]["pageInfo"] = {
+                        "hasNextPage": True, "endCursor": "private-next"}
+                    return result
+                return {"viewer": {"repositories": {
+                    "nodes": [project] if accessible and affiliated else [],
+                    "pageInfo": {"hasNextPage": False, "endCursor": None}}}}
+            if query is g.EXTERNAL_Q and contributed:
+                return {"user": {"repositoriesContributedTo": {
+                    "nodes": [project], "pageInfo": {"hasNextPage": False}},
+                    "contributionsCollection": {"commitContributionsByRepository": [
+                        {"repository": project}]}}}
+            if query is g.HISTORY_Q and v["name"] == project["name"]:
+                gh.calls.append((query, private, missing_ok, v))
+                if not accessible:
+                    return {"repository": None}
+                return {"repository": {"defaultBranchRef": {"target": {"allCommits": {"totalCount": len(shas)}, "history": {
+                    "nodes": [{"oid": sha, "authoredDate": RECENT,
+                               "author": {"user": {"id": "ME"}}} for sha in shas],
+                    "pageInfo": {"hasNextPage": False}}}}}}
+            return base(query, private=private, missing_ok=missing_ok, **v)
+
+        def rest(path, private=False):
+            if "hidden-project/commits/" in path:
+                gh.calls.append(("REST", path, private))
+                return {"parents": [{}], "files": [{"filename": "hidden-path.rs",
+                    "status": "added", "patch": "+é"}]}
+            return gh.rest(path, private=private)
+
+        with mock.patch.object(g, "gql", gql), mock.patch.object(g, "rest", rest), \
+                mock.patch.object(g, "TOKEN", "test"), \
+                mock.patch.object(g, "CONFIG", {**g.CONFIG, "exclude_repos": ["acidvegas/farming"]}), \
+                mock.patch("sys.stdout", new_callable=io.StringIO) as logs:
+            data = g.collect()
+        return data, gh.calls, shas, logs.getvalue()
+
+    def test_six_private_commits_from_affiliation_discovery_reach_panel(self):
+        data, calls, shas, logs = self.collect_private()
+        self.assertEqual(data["contrib_langs"]["Rust"], 12 + 6 * len("é\n".encode()))
+        self.assertEqual(len([c for c in calls if c[0] == "REST" and "hidden-project" in c[1]]), 6)
+        self.assertTrue(all(c[2] for c in calls if c[0] == "REST" and "hidden-project" in c[1]))
+        self.assertTrue(set(shas).issubset(data["secrets"]))
+        self.assertIn("hidden-path.rs", data["secrets"])
+        self.assertNotIn("hidden", logs)
+        svg, summary = g.panel_languages(data)
+        shares = {name: pct for name, pct, _ in summary}
+        self.assertAlmostEqual(shares["Rust"], round(100 * 30 / 2041, 1))
+        self.assertIn("Zig", shares)
+        with mock.patch("sys.stdout", new_callable=io.StringIO):
+            g.leak_check({"languages.svg": svg}, data["secrets"])
+
+    def test_private_repository_from_multiple_sources_is_measured_once(self):
+        data, calls, _, _ = self.collect_private(contributed=True)
+        self.assertEqual(data["contrib_langs"]["Rust"], 30)
+        histories = [c for c in calls if c[0] is g.HISTORY_Q and c[3]["name"] == "hidden-project"]
+        self.assertEqual(len(histories), 1)
+
+    def test_private_contribution_discovery_can_supply_repository(self):
+        data, _, _, _ = self.collect_private(contributed=True, affiliated=False)
+        self.assertEqual(data["contrib_langs"]["Rust"], 30)
+
+    def test_unreadable_private_repository_does_not_invent_contributions(self):
+        data, calls, _, _ = self.collect_private(accessible=False, contributed=True)
+        self.assertEqual(data["contrib_langs"]["Rust"], 12)
+        self.assertFalse(any(c[0] == "REST" and "hidden-project" in c[1] for c in calls))
+
+    def test_larger_raw_rust_count_can_still_round_to_same_percentage(self):
+        data, _, _, _ = self.collect_private()
+        data["repos"] = [repo_node("large")]
+        data["repos"][0]["languages"]["edges"][0]["size"] = 982000
+        data["private_langs"] = []
+        data["contrib_langs"] = Counter({"Rust": 18000, "Zig": 1})
+        _, before = g.panel_languages(data)
+        data["contrib_langs"]["Rust"] += 18
+        _, after = g.panel_languages(data)
+        self.assertEqual(next(p for n, p, _ in before if n == "Rust"), 1.8)
+        self.assertEqual(next(p for n, p, _ in after if n == "Rust"), 1.8)
+
+
 class HelpersTest(unittest.TestCase):
+    def test_private_discovery_includes_member_owned_repositories(self):
+        self.assertIn("ownerAffiliations: [OWNER, COLLABORATOR, ORGANIZATION_MEMBER]", g.PRIVATE_Q)
+
+    def test_history_requires_resolved_primary_account_and_paginates(self):
+        nodes = [{"oid": str(i), "authoredDate": RECENT, "author": author}
+                 for i, author in enumerate([
+                     {"user": {"id": "ME"}}, {"user": {"id": "OTHER"}},
+                     {"user": None}, None])]
+        pages = [{"repository": {"defaultBranchRef": {"target": {"history": {
+            "nodes": page, "pageInfo": {"hasNextPage": i == 0, "endCursor": "next"}}}}}}
+                 for i, page in enumerate([nodes[:2], nodes[2:]])]
+        with mock.patch.object(g, "gql", side_effect=pages) as query:
+            commits = g.my_commits_in("sample", "ME", owner="someone", private=True)
+        self.assertEqual([sha for sha, _ in commits], ["0"])
+        self.assertEqual([c.kwargs["after"] for c in query.call_args_list], [None, "next"])
+        self.assertTrue(all(c.kwargs["private"] for c in query.call_args_list))
+        self.assertIn("defaultBranchRef", g.HISTORY_Q)
+
     def test_language_of(self):
         cases = {"a/b.cpp": "C++", "x.h": "C", "lib.rs": "Rust", "build.zig": "Zig", "CMakeLists.txt": "CMake",
                  "Dockerfile": "Dockerfile", "README.md": None, "data.json": None, "third_party/x.c": None,
@@ -215,6 +400,27 @@ class HelpersTest(unittest.TestCase):
     def test_added_bytes_counts_only_added_lines(self):
         patch = "--- a/f\n+++ b/f\n@@ -1,2 +1,2 @@\n ctx\n-gone\n+new line\n+é"
         self.assertEqual(g.added_bytes(patch), len("new line") + 1 + len("é".encode()) + 1)
+
+    def test_added_line_starting_with_two_pluses_is_code(self):
+        self.assertEqual(g.added_bytes("+++ b/f\n@@ -0,0 +1 @@\n+++counter;"), len("++counter;\n"))
+        self.assertEqual(g.added_bytes("+++ b/f\n@@ -0,0 +1 @@\n+++ counter;"), len("++ counter;\n"))
+
+    def test_added_bytes_without_final_newline(self):
+        patch = "@@ -1 +1 @@\n-old\n\\ No newline at end of file\n+é\n\\ No newline at end of file"
+        self.assertEqual(g.added_bytes(patch), len("é".encode()))
+
+    def test_source_line_separators_are_counted_as_source_bytes(self):
+        source = 'let s = "a\vb\fc\x85d\u2028e\u2029f";'
+        self.assertEqual(g.added_bytes("@@ -0,0 +1 @@\n+" + source), len(source.encode()) + 1)
+
+    def test_unavailable_and_merge_diffs_never_estimate_bytes(self):
+        for response, counter in [(None, "unavailable"),
+                                  ({"parents": [{}, {}], "files": DIFFS["f1"]}, "merges"),
+                                  ({"parents": [{}], "files": [{"filename": "big.rs"}]}, "unmeasured")]:
+            stats = Counter()
+            with mock.patch.object(g, "rest", return_value=response):
+                self.assertEqual(g.commit_languages("o", "n", "sha", True, stats), Counter())
+            self.assertEqual(stats[counter], 1)
 
     def test_commit_file_list_is_paginated(self):
         pages = {1: [{"filename": f"f{i}.py", "status": "added", "patch": "+x"} for i in range(100)],
@@ -256,6 +462,12 @@ class ApiErrorTest(unittest.TestCase):
             with self.assertRaises(SystemExit) as cm:
                 g.gql("q", private=True)
         self.assertNotIn("secret", str(cm.exception))
+
+    def test_external_discovery_errors_hide_private_metadata(self):
+        body = {"errors": [{"type": "INTERNAL", "message": "hidden-owner/hidden-repo"}]}
+        with self.payload(body), self.assertRaises(SystemExit) as cm:
+            g.external_repos()
+        self.assertNotIn("hidden", str(cm.exception))
 
     def test_rest_skips_missing_but_not_rate_limits(self):
         def raise_(code, remaining="10"):
