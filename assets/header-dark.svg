@@ -7,7 +7,7 @@
 <text x="28.0" y="140.0" class="f t" font-size="16" font-weight="500">Ports, recompilers and desktop tools</text>
 <text x="28.0" y="163.0" class="f mu" font-size="16">that make things run where they shouldn’t.</text>
 <circle cx="34" cy="186" r="4" fill="#3fb950"/>
-<text x="46.0" y="190.0" class="f mu" font-size="13">GitHub only · Gitea token missing</text>
+<text x="46.0" y="190.0" class="f mu" font-size="13">GitHub + Gitea</text>
 <rect x="456.5" y="20.5" width="363" height="187" rx="6" fill="#0d1117" stroke="#30363d"/>
 <text x="472.0" y="47.0" class="f t" font-size="13" font-weight="600">Latest releases</text>
 <text x="804.0" y="47.0" class="f mu" font-size="12" text-anchor="end">live from the API</text>
