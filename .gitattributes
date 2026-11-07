@@ -1,0 +1,3 @@
+# Generated asset hashes describe the exact bytes served by GitHub on every OS.
+assets/*.svg text eol=lf
+assets/*.json text eol=lf

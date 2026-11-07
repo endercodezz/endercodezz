@@ -1,4 +1,4 @@
-<a href="https://enderlit.com"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/header-dark.svg"><source media="(prefers-color-scheme: light)" srcset="assets/header-light.svg"><img src="assets/header-dark.svg" width="100%" alt="enderlit: ports, recompilers and desktop tools that make things run where they shouldn't"></picture>
+<a href="https://enderlit.com"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/header-dark.ef67135d4e6c968a3bb5abbaa273fb64b8f581829a15de466e40c7e5f1eb4a5f.svg"><source media="(prefers-color-scheme: light)" srcset="assets/header-light.a1cfef2db02e16e3f9f5a1845b35ad49b76a8ba5bd2fe0ca95114546bff78065.svg"><img src="assets/header-dark.ef67135d4e6c968a3bb5abbaa273fb64b8f581829a15de466e40c7e5f1eb4a5f.svg" width="100%" alt="enderlit: ports, recompilers and desktop tools that make things run where they shouldn't"></picture>
 </a>
 
 <p align="center">
@@ -9,27 +9,27 @@ I like making software run where it was never meant to: a PSP game on a New 3DS,
 
 ## Featured
 
-<a href="https://github.com/endercodezz/P3P3DS"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/card-p3p3ds-dark.svg"><source media="(prefers-color-scheme: light)" srcset="assets/card-p3p3ds-light.svg"><img src="assets/card-p3p3ds-dark.svg" width="100%" alt="P3P3DS: Persona 3 Portable on the New Nintendo 3DS through static recompilation"></picture></a>
+<a href="https://github.com/endercodezz/P3P3DS"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/card-p3p3ds-dark.cbb42413f7dc9a73c22b3850197e41dc0861eda0afa5a50ed60e093699c71ff2.svg"><source media="(prefers-color-scheme: light)" srcset="assets/card-p3p3ds-light.81c26b520310456a0433833c18a16925e0cb7f1af5c0fd8c5cc02c4b9f451d04.svg"><img src="assets/card-p3p3ds-dark.cbb42413f7dc9a73c22b3850197e41dc0861eda0afa5a50ed60e093699c71ff2.svg" width="100%" alt="P3P3DS: Persona 3 Portable on the New Nintendo 3DS through static recompilation"></picture></a>
 
-<a href="https://github.com/endercodezz/BYDLO"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/card-bydlo-dark.svg"><source media="(prefers-color-scheme: light)" srcset="assets/card-bydlo-light.svg"><img src="assets/card-bydlo-dark.svg" width="100%" alt="BYDLO: one GUI launcher for VPN and proxy engines"></picture></a>
+<a href="https://github.com/endercodezz/BYDLO"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/card-bydlo-dark.d4cc867a42807ea16280978d0f4558e2a6b252f0b684370c7bc82a172fac284c.svg"><source media="(prefers-color-scheme: light)" srcset="assets/card-bydlo-light.9c1ab408ee585434d4daa1c75a0ce674a6020bf1238b6702f9179acd38bd12b0.svg"><img src="assets/card-bydlo-dark.d4cc867a42807ea16280978d0f4558e2a6b252f0b684370c7bc82a172fac284c.svg" width="100%" alt="BYDLO: one GUI launcher for VPN and proxy engines"></picture></a>
 
 ## Also shipping
 
 <p>
-  <a href="https://github.com/endercodezz/AnimeBox"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/card-animebox-dark.svg"><source media="(prefers-color-scheme: light)" srcset="assets/card-animebox-light.svg"><img src="assets/card-animebox-dark.svg" width="49%" alt="AnimeBox: a local anime library"></picture></a>
-  <a href="https://github.com/endercodezz/enderlitplayer"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/card-enderlitplayer-dark.svg"><source media="(prefers-color-scheme: light)" srcset="assets/card-enderlitplayer-light.svg"><img src="assets/card-enderlitplayer-dark.svg" width="49%" alt="Enderlit Player: a desktop music player"></picture></a>
-  <a href="https://github.com/endercodezz/3Dropia"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/card-3dropia-dark.svg"><source media="(prefers-color-scheme: light)" srcset="assets/card-3dropia-light.svg"><img src="assets/card-3dropia-dark.svg" width="49%" alt="3Dropia: send files to a 3DS over LAN"></picture></a>
+  <a href="https://github.com/endercodezz/AnimeBox"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/card-animebox-dark.3c0dae13f5c5909c97f16b157c5386e0a541889b14b295b34f14b66087821108.svg"><source media="(prefers-color-scheme: light)" srcset="assets/card-animebox-light.631f4f16f171a63bc283dc0971f5a40f44721fb05964b78a718bf44fee3e6cf7.svg"><img src="assets/card-animebox-dark.3c0dae13f5c5909c97f16b157c5386e0a541889b14b295b34f14b66087821108.svg" width="49%" alt="AnimeBox: a local anime library"></picture></a>
+  <a href="https://github.com/endercodezz/enderlitplayer"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/card-enderlitplayer-dark.d68c132e90df99b3130d309f050323119a8a76d4bf47f15ae956f38425162f52.svg"><source media="(prefers-color-scheme: light)" srcset="assets/card-enderlitplayer-light.17dcd4e7832cf034aec1ca32e92df0662b9d62366cbb8e6e05a0b6c8564c784d.svg"><img src="assets/card-enderlitplayer-dark.d68c132e90df99b3130d309f050323119a8a76d4bf47f15ae956f38425162f52.svg" width="49%" alt="Enderlit Player: a desktop music player"></picture></a>
+  <a href="https://github.com/endercodezz/3Dropia"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/card-3dropia-dark.fc89f0a852819709bc46cfe10155a8c0e240add782e60b645c82e1de8f20fd5c.svg"><source media="(prefers-color-scheme: light)" srcset="assets/card-3dropia-light.3e00823ef8b3a9250eb79dc9029d3e0f93ac71f6eac9800ef2bd64546e48b190.svg"><img src="assets/card-3dropia-dark.fc89f0a852819709bc46cfe10155a8c0e240add782e60b645c82e1de8f20fd5c.svg" width="49%" alt="3Dropia: send files to a 3DS over LAN"></picture></a>
 </p>
 
 ## By the numbers
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="assets/activity-dark.svg"><source media="(prefers-color-scheme: light)" srcset="assets/activity-light.svg"><img src="assets/activity-dark.svg" width="100%" alt="Daily development activity from the available providers"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/activity-dark.09116b12386d8e5756bf4650c3043ae80db1ed28d22c5388c0bcc0e651f16eba.svg"><source media="(prefers-color-scheme: light)" srcset="assets/activity-light.986ac851f636f612040ca8827415db30f786e844823d9a0b9cff7130623a3a00.svg"><img src="assets/activity-dark.09116b12386d8e5756bf4650c3043ae80db1ed28d22c5388c0bcc0e651f16eba.svg" width="100%" alt="Daily development activity from the available providers"></picture>
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="assets/shipping-dark.svg"><source media="(prefers-color-scheme: light)" srcset="assets/shipping-light.svg"><img src="assets/shipping-dark.svg" width="100%" alt="Releases over time, one lane per project"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/shipping-dark.858cd39895af9d7f9d45062145b7eadfb4dd04add6ab4cf6a5315eac226fe660.svg"><source media="(prefers-color-scheme: light)" srcset="assets/shipping-light.41844be2a637d10f263a54043ee981c8096ee4dcef334e3e67b9435ccd6c1d14.svg"><img src="assets/shipping-dark.858cd39895af9d7f9d45062145b7eadfb4dd04add6ab4cf6a5315eac226fe660.svg" width="100%" alt="Releases over time, one lane per project"></picture>
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="assets/languages-dark.svg"><source media="(prefers-color-scheme: light)" srcset="assets/languages-light.svg"><img src="assets/languages-dark.svg" width="100%" alt="Languages by share of bytes"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/languages-dark.a25faf2b314aac6cd112b74e2553f434037b26103c3d5d55acad43d4bc5db00c.svg"><source media="(prefers-color-scheme: light)" srcset="assets/languages-light.91f3bd7b05cb85d7e79bed7c38adbcb916cb795d195e06395f8cc316be6c60b2.svg"><img src="assets/languages-dark.a25faf2b314aac6cd112b74e2553f434037b26103c3d5d55acad43d4bc5db00c.svg" width="100%" alt="Languages by share of bytes"></picture>
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="assets/rhythm-dark.svg"><source media="(prefers-color-scheme: light)" srcset="assets/rhythm-light.svg"><img src="assets/rhythm-dark.svg" width="100%" alt="Commit punchcard by weekday and hour"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/rhythm-dark.0041f4255e69a4f355c279c9054aeac89e7b760f04e3fa23e4e71e553ee01c4b.svg"><source media="(prefers-color-scheme: light)" srcset="assets/rhythm-light.223f8976decc9f73fd4707e7ef5fcf6d7682dc378cd3e6c9d85271f6a0a3fd12.svg"><img src="assets/rhythm-dark.0041f4255e69a4f355c279c9054aeac89e7b760f04e3fa23e4e71e553ee01c4b.svg" width="100%" alt="Commit punchcard by weekday and hour"></picture>
 
 <!-- numbers:start -->
 <details>
@@ -46,7 +46,7 @@ I like making software run where it was never meant to: a PSP game on a New 3DS,
 | Commit rhythm | busiest hour Wed 01:00 UTC · 17% between 00:00 and 06:00 UTC · 28% on weekends |
 | Languages | C++ 44.5% · C# 27.2% · Python 14.0% · C 5.2% · TypeScript 3.3% · HTML 1.1% · Rust 1.0% · JavaScript 1.0% · Zig 0.5% · Other 2.3% |
 
-<sub>Generated 2026-11-07 21:39 UTC. Sources: GitHub + Gitea. Heatmap events are GitHub contributions plus additional personal Gitea commits, deduplicated by SHA after mirror exclusion. GitHub's original contribution calendar is reported separately.</sub>
+<sub>Sources: GitHub + Gitea. Heatmap events are GitHub contributions plus additional personal Gitea commits, deduplicated by SHA after mirror exclusion. GitHub's original contribution calendar is reported separately.</sub>
 </details>
 <!-- numbers:end -->
 
@@ -58,3 +58,7 @@ I like making software run where it was never meant to: a PSP game on a New 3DS,
 **Targets:** Windows · Linux · macOS · New Nintendo 3DS
 
 <sub>Every chart on this page is redrawn every 3 hours (00:00, 03:00 … 21:00 UTC) by <a href=".github/workflows/refresh.yml">a workflow in this repo</a> from the GitHub and Gitea APIs. No time trackers and no third-party stat services. Private repositories count toward the totals and are never named.</sub>
+
+<!-- refresh:start -->
+<sub>Last updated: November 7, 2026 at 21:39 UTC</sub>
+<!-- refresh:end -->

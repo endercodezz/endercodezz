@@ -82,3 +82,16 @@ GitHub-only result; Gitea totals are null, not fabricated zeroes. Authentication
 access, API, or mirror-resolution failures abort before writing public artifacts.
 Logs contain status and aggregate counters only. Local tests use synthetic data;
 successful authenticated integration must be verified separately in Actions.
+
+## Refresh publication and asset caching
+
+Successful generation records its UTC completion timestamp in `stats.json.generated`
+and the README's bottom refresh block. Collection, rendering, privacy validation,
+or publication failure must not advance that timestamp. Publication is staged
+and restores the preceding files if replacement or obsolete-asset cleanup fails.
+
+Every generated SVG uses its full SHA-256 content digest in its filename. The
+generator updates both light/dark `source srcset` references and `img src` values.
+Unchanged bytes retain their filenames and are not rewritten; preceding generated
+versions are removed after successful publication. Non-generated assets remain.
+SVG/JSON line endings are fixed to LF so hashes match bytes served from GitHub.

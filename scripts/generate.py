@@ -24,11 +24,13 @@ Private repositories
 from __future__ import annotations
 
 import datetime as dt
+import hashlib
 import json
 import math
 import os
 import re
 import sys
+import tempfile
 import urllib.error
 import urllib.request
 from collections import Counter, defaultdict
@@ -1028,7 +1030,7 @@ def card_small(data, p) -> str:
 
 
 # ---------------------------------------------------------------- README block
-def export_json(data, act, langs, rhythm, ship) -> str:
+def export_json(data, act, langs, rhythm, ship, generated_at=None) -> str:
     """Aggregated, public-safe data for enderlit.com. Private repos appear only
     as the PRIVATE bucket (no names, no tags); everything else is public info."""
     days = [x for w in data["cc"]["contributionCalendar"]["weeks"] for x in w["contributionDays"]]
@@ -1050,7 +1052,7 @@ def export_json(data, act, langs, rhythm, ship) -> str:
                "language": r["primaryLanguage"], "pushed": r["pushedAt"]}
               for r in data["repos"] if not r["isFork"] and r["name"] not in tracked]
     payload = {
-        "v": 1, "generated": NOW.isoformat(timespec="seconds"), "user": USER,
+        "v": 1, "generated": (generated_at or NOW).astimezone(dt.timezone.utc).isoformat(timespec="seconds"), "user": USER,
         "contributions": {
             "total": act["total"], "private": act["private"], "active_days": act["github_active"],
             "commits": act["commits"], "commits_all_repos": act["commits_all"],
@@ -1105,10 +1107,90 @@ def numbers_block(act, langs, rhythm, ship, providers=None) -> str:
               f"| Releases | {ship['releases']} published since {ship['since']} · {fmt(ship['downloads'])} asset downloads |",
               f"| Commit rhythm | busiest hour {rhythm['peak']} · {rhythm['night']}% between 00:00 and 06:00 {TZ_LABEL} · {rhythm['weekend']}% on weekends |",
               "| Languages | " + " · ".join(f"{n} {p}%" for n, p, _ in langs) + " |"]
-    stamp = NOW.strftime("%Y-%m-%d %H:%M UTC")
     scope = provider_scope({"providers": providers or {}})
     return ("<details>\n<summary>The same numbers as text</summary>\n\n" + "\n".join(lines) +
-            f"\n\n<sub>Generated {stamp}. Sources: {scope}. Heatmap events are GitHub contributions plus additional personal Gitea commits, deduplicated by SHA after mirror exclusion. GitHub's original contribution calendar is reported separately.</sub>\n</details>")
+            f"\n\n<sub>Sources: {scope}. Heatmap events are GitHub contributions plus additional personal Gitea commits, deduplicated by SHA after mirror exclusion. GitHub's original contribution calendar is reported separately.</sub>\n</details>")
+
+
+SVG_REFERENCE = re.compile(r'''(?P<prefix>\b(?:src|srcset)=["'])assets/(?P<base>[A-Za-z0-9_.-]+-(?:light|dark))(?:\.[a-f0-9]{64})?\.svg(?:\?[^"']*)?(?P<quote>["'])''')
+GENERATED_SVG = re.compile(r"(?:header|activity|languages|rhythm|shipping|card-[A-Za-z0-9_.-]+)-(?:light|dark)(?:\.[a-f0-9]{64})?\.svg")
+
+
+def refresh_block(generated_at):
+    stamp = generated_at.astimezone(dt.timezone.utc)
+    text = f"Last updated: {stamp:%B} {stamp.day}, {stamp.year} at {stamp:%H:%M} UTC"
+    return "<!-- refresh:start -->\n<sub>" + text + "</sub>\n<!-- refresh:end -->"
+
+
+def prepare_publication(outputs, readme, generated_at):
+    """Content-address every SVG; unchanged bytes retain exactly the same URL."""
+    files, paths = {}, {}
+    for name, content in outputs.items():
+        if name.endswith(".svg"):
+            digest = hashlib.sha256(content.encode("utf-8")).hexdigest()
+            hashed = name[:-4] + "." + digest + ".svg"
+            files[hashed] = content
+            paths[name] = hashed
+        else:
+            files[name] = content
+    def reference(match):
+        logical = match["base"] + ".svg"
+        if logical not in paths:
+            raise SystemExit("README references an unavailable generated SVG; nothing was written")
+        return match["prefix"] + "assets/" + paths[logical] + match["quote"]
+    readme = SVG_REFERENCE.sub(reference, readme)
+    block = refresh_block(generated_at)
+    marker = r"<!-- refresh:start -->.*?<!-- refresh:end -->"
+    if re.search(marker, readme, re.S):
+        readme, count = re.subn(marker, lambda _: block, readme, flags=re.S)
+        if count != 1:
+            raise SystemExit("README has duplicate refresh markers; nothing was written")
+    else:
+        readme = readme.rstrip() + "\n\n" + block + "\n"
+    return files, readme
+
+
+def static_readme(readme):
+    """Only generated numbers, refresh text and known SVG identities may change."""
+    readme = re.sub(r"<!-- (numbers|refresh):start -->.*?<!-- \1:end -->", "", readme, flags=re.S)
+    return SVG_REFERENCE.sub(lambda m: m["prefix"] + "assets/" + m["base"] + ".svg" + m["quote"], readme).strip()
+
+
+def publish_outputs(outputs, readme):
+    """Stage first, roll back on write/cleanup failure; publish the README last."""
+    ASSETS.mkdir(exist_ok=True)
+    targets = {ASSETS / name: content for name, content in outputs.items()}
+    targets[ROOT / "README.md"] = readme
+    obsolete = [p for p in ASSETS.glob("*.svg") if GENERATED_SVG.fullmatch(p.name) and p not in targets]
+    backup = {p: (p.read_bytes(), p.stat()) if p.exists() else None for p in [*targets, *obsolete]}
+    try:
+        with tempfile.TemporaryDirectory(prefix=".profile-stage-", dir=ROOT) as folder:
+            stage = Path(folder).resolve()
+            assert stage.is_relative_to(ROOT.resolve())
+            staged = {}
+            for index, (path, content) in enumerate(targets.items()):
+                raw = content.encode("utf-8")
+                if backup[path] is not None and backup[path][0] == raw:
+                    continue
+                tmp = stage / str(index)
+                tmp.write_bytes(raw)
+                staged[path] = tmp
+            for path, tmp in staged.items():
+                os.replace(tmp, path)
+            for path in obsolete:
+                path.unlink()
+    except Exception:
+        restored = True
+        for path, previous in backup.items():
+            try:
+                if previous is None:
+                    path.unlink(missing_ok=True)
+                else:
+                    path.write_bytes(previous[0])
+                    os.utime(path, ns=(previous[1].st_atime_ns, previous[1].st_mtime_ns))
+            except OSError:
+                restored = False
+        raise SystemExit("Profile publication failed; " + ("previous artifacts restored" if restored else "rollback incomplete")) from None
 
 
 def stats_private_strings(value, path=()):
@@ -1163,12 +1245,13 @@ def leak_check(files: dict[str, str], secrets: set[str], public_readme: str | No
             block = r"(<!-- numbers:start -->\n)(.*?)(<!-- numbers:end -->)"
             before = re.search(block, public_readme, re.S)
             after = re.search(block, content, re.S)
-            if not before or not after or re.sub(block, "", public_readme, flags=re.S) != re.sub(block, "", content, flags=re.S):
+            if not before or not after or static_readme(public_readme) != static_readme(content):
                 sys.exit("README changed outside the generated block; nothing was written")
             # Existing public prose/links can share words with private metadata.
             # The generator never changes those bytes. Scan all newly generated
             # content; the full document was already scanned for tokens above.
-            hay = after.group(2).lower()
+            refresh = re.search(r"<!-- refresh:start -->(.*?)<!-- refresh:end -->", content, re.S)
+            hay = (after.group(2) + (refresh.group(1) if refresh else "")).lower()
         payload = None
         if fname == "stats.json":
             try:
@@ -1214,6 +1297,7 @@ def main():
         sys.exit("GH_TOKEN is not set")
     data = collect()
     out, (act, langs, rhythm, ship) = render_all(data)
+    generated_at = dt.datetime.now(dt.timezone.utc)
 
     readme = ROOT / "README.md"
     src = readme.read_text("utf-8")
@@ -1224,16 +1308,11 @@ def main():
     if n != 1:
         sys.exit("README is missing the <!-- numbers:start/end --> markers")
 
-    out["stats.json"] = export_json(data, act, langs, rhythm, ship)
+    out["stats.json"] = export_json(data, act, langs, rhythm, ship, generated_at)
+    out, src = prepare_publication(out, src, generated_at)
     leak_check({**out, "README.md": src}, data["secrets"], public_readme)
-    ASSETS.mkdir(exist_ok=True)
-    for old in [*ASSETS.glob("*.svg"), *ASSETS.glob("*.json")]:
-        if old.name not in out:
-            old.unlink()
-    for name, content in out.items():
-        (ASSETS / name).write_text(content, "utf-8", newline="\n")
-    readme.write_text(src, "utf-8", newline="\n")
-    print(f"wrote {len(out)} svgs · {act['total']} {act['label']} · {ship['releases']} releases")
+    publish_outputs(out, src)
+    print(f"wrote {sum(name.endswith('.svg') for name in out)} svgs · {act['total']} {act['label']} · {ship['releases']} releases")
 
 
 if __name__ == "__main__":
