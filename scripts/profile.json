@@ -44,5 +44,9 @@
   "language_highlight": [
     "Rust",
     "Zig"
+  ],
+  "_exclude_repos": "Repositories whose commits carry my name/e-mail without being mine (e.g. bots that push empty commits with forged authorship). They are never read for commits or languages.",
+  "exclude_repos": [
+    "acidvegas/farming"
   ]
 }

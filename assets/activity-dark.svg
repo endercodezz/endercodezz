@@ -8,7 +8,7 @@
 <text x="28.0" y="100.0" class="f t num" font-size="24" font-weight="600">1,144</text>
 <text x="28.0" y="120.0" class="f mu" font-size="12.5">contributions</text>
 <line x1="172.0" y1="72" x2="172.0" y2="114" stroke="#30363d"/>
-<text x="188.0" y="100.0" class="f t num" font-size="24" font-weight="600">737</text>
+<text x="188.0" y="100.0" class="f t num" font-size="24" font-weight="600">733</text>
 <text x="188.0" y="120.0" class="f mu" font-size="12.5">commits, all repos</text>
 <line x1="332.0" y1="72" x2="332.0" y2="114" stroke="#30363d"/>
 <text x="348.0" y="100.0" class="f t num" font-size="24" font-weight="600">107</text>

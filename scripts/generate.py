@@ -29,9 +29,7 @@ import math
 import os
 import re
 import sys
-import time
 import urllib.error
-import urllib.parse
 import urllib.request
 from collections import Counter, defaultdict
 from html import escape
@@ -123,7 +121,7 @@ def rest(path: str, private: bool = False):
 PROFILE_Q = """
 query($login: String!) {
   user(login: $login) {
-    id createdAt
+    id
     contributionsCollection {
       totalCommitContributions totalIssueContributions totalPullRequestContributions
       totalPullRequestReviewContributions restrictedContributionsCount
@@ -217,48 +215,13 @@ def my_commits_in(repo: str, author: str, owner: str = USER,
         after = h["pageInfo"]["endCursor"]
 
 
-SEARCH_PAUSE = 2.1    # seconds; the commit search API allows 30 requests per minute
+def external_repos() -> list[dict]:
+    """Other people's / organisations' repos I contributed to, de-duplicated.
 
-
-def search_commit_repos(start: dt.date, end: dt.date) -> list[dict]:
-    """Repos where GitHub commit search finds commits I authored. This catches repos
-    the contribution graph ignores (commits to a repo I never forked, starred, or
-    opened an issue/PR in). A date window with more than 1000 hits (the search
-    cap) is split in half."""
-    found: dict[str, dict] = {}
-
-    def window(a: dt.date, b: dt.date) -> None:
-        for page in range(1, 11):
-            q = urllib.parse.quote(f"author:{USER} author-date:{a.isoformat()}..{b.isoformat()}")
-            res = rest(f"/search/commits?q={q}&per_page=100&page={page}")
-            time.sleep(SEARCH_PAUSE)
-            if res is None:
-                return
-            if page == 1 and res.get("total_count", 0) > 1000 and a < b:
-                mid = a + (b - a) / 2
-                window(a, mid)
-                window(mid + dt.timedelta(days=1), b)
-                return
-            items = res.get("items") or []
-            for it in items:
-                r = it["repository"]
-                found.setdefault(r["full_name"].lower(), {
-                    "name": r["name"], "owner": {"login": r["owner"]["login"]}, "isPrivate": r["private"],
-                    "isFork": r["fork"], "description": r.get("description"), "url": r.get("html_url")})
-            if len(items) < 100:
-                return
-
-    window(start, end)
-    return list(found.values())
-
-
-def external_repos(created: dt.date | None = None) -> list[dict]:
-    """Other people's / organisations' repos I contributed to, de-duplicated."""
+    Only sources tied to actions of my account are used. Commit search is not:
+    it matches the author e-mail written into a commit, which anyone can forge
+    (e.g. bots that push empty commits "authored" by other users)."""
     found, after = {}, None
-    if created:
-        for r in search_commit_repos(created, NOW.date()):
-            if r["owner"]["login"].lower() != USER.lower():
-                found.setdefault(f"{r['owner']['login']}/{r['name']}".lower(), r)
     while True:
         u = gql(EXTERNAL_Q, missing_ok=True, login=USER, after=after).get("user") or {}
         nodes = list((u.get("repositoriesContributedTo") or {}).get("nodes") or [])
@@ -412,13 +375,15 @@ def collect():
             after = page["pageInfo"]["endCursor"]
 
     # Other people's and organisations' repos, public and (with an owner token) private.
-    created = dt.date.fromisoformat(d["createdAt"][:10]) if d.get("createdAt") else None
-    for r in external_repos(created):
+    for r in external_repos():
         if r["isPrivate"]:
             secrets.update(filter(None, (r["name"], r["description"], r["url"], r["owner"]["login"],
                                          f"{r['owner']['login']}/{r['name']}")))
         sources.setdefault(f"{r['owner']['login']}/{r['name']}".lower(),
                            (r["owner"]["login"], r["name"], r["isPrivate"], "foreign"))
+    # Repos known to forge my authorship (profile.json): never read, whatever source lists them.
+    for key in (k.lower() for k in CONFIG.get("exclude_repos", [])):
+        sources.pop(key, None)
 
     # Commits I authored, each SHA once wherever it appears (fork and upstream,
     # mirrors, a repo reached twice). Commits by others are filtered out by the

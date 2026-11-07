@@ -8,7 +8,6 @@ import json
 import sys
 import unittest
 import urllib.error
-import urllib.parse
 from collections import Counter
 from pathlib import Path
 from unittest import mock
@@ -36,11 +35,11 @@ def ext(owner, name, private=False):
 HISTORY = {
     "endercodezz/alpha": [[("a1", RECENT), ("a2", OLD)], [("a3", RECENT)]],    # two pages
     "endercodezz/fork": [[("f1", RECENT), ("s1", RECENT)]],                      # my fork
-    "up/stream": [[("s1", RECENT), ("u1", RECENT)]],                             # s1 merged upstream
+    "up/stream": [[("s1", RECENT), ("u1", RECENT), ("z1", RECENT)]],             # s1 merged upstream
     "other/lib": [[("a1", RECENT)]],                                             # same commit as alpha
     "endercodezz/secret-own": [[("p1", RECENT)]],                                # my private repo
     "orgx/secret-org": [[("o1", RECENT)]],                                       # private org repo
-    "far/away": [[("z1", RECENT)]],                                            # only found by commit search
+    "acidvegas/farming": [[("sp1", RECENT), ("sp2", RECENT)]],                  # forged authorship
     "endercodezz/endercodezz": [[("e1", RECENT)]],                             # this profile repo
     # "gone/repo" is missing on purpose
 }
@@ -85,7 +84,7 @@ class FakeGitHub:
                         {"repository": ext("orgx", "secret-org", private=True)},
                         {"repository": ext(g.USER, "alpha")}]}}}           # own repo: not external
             return {"user": {"repositoriesContributedTo": {"pageInfo": {"hasNextPage": False, "endCursor": None},
-                                                           "nodes": [ext("other", "lib")]},
+                                                           "nodes": [ext("other", "lib"), ext("acidvegas", "farming")]},
                              "contributionsCollection": {"commitContributionsByRepository": []}}}
         if query is g.HISTORY_Q:
             assert missing_ok, "history must tolerate missing repositories"
@@ -102,13 +101,8 @@ class FakeGitHub:
         raise AssertionError("unexpected query")
 
     def rest(self, path, private=False):
-        if path.startswith("/search/commits"):
-            self.calls.append(("SEARCH", path, private))
-            hit = lambda full, priv: {"repository": {"full_name": full, "name": full.split("/")[1],
-                                                     "owner": {"login": full.split("/")[0]}, "private": priv,
-                                                     "fork": False, "description": None, "html_url": "u"}}
-            return {"total_count": 3, "items": [hit("far/away", False), hit("endercodezz/alpha", False),
-                                                 hit("up/stream", False)]}
+        if path.startswith("/search/"):
+            raise AssertionError("commit search must not be used: it trusts forgeable author e-mails")
         self.calls.append(("REST", path, private))
         sha = path.split("/commits/")[1].split("?")[0]
         if sha not in DIFFS:
@@ -120,7 +114,8 @@ class CollectTest(unittest.TestCase):
     def setUp(self):
         self.gh = FakeGitHub()
         patches = [mock.patch.object(g, "gql", self.gh.gql), mock.patch.object(g, "rest", self.gh.rest),
-                   mock.patch.object(g, "TOKEN", "test"), mock.patch.object(g, "SEARCH_PAUSE", 0),
+                   mock.patch.object(g, "TOKEN", "test"),
+                   mock.patch.object(g, "CONFIG", {**g.CONFIG, "exclude_repos": ["acidvegas/farming"]}),
                    mock.patch("sys.stdout", new_callable=io.StringIO)]
         self.out = [p.start() for p in patches][-1]
         for p in patches:
@@ -131,9 +126,14 @@ class CollectTest(unittest.TestCase):
         # unique SHAs: a1 a2 a3 f1 s1 u1 p1 o1 z1 e1; a2 is older than a year
         self.assertEqual(len(self.data["times"]), 9)
 
-    def test_repo_found_only_by_commit_search_is_read(self):
-        away = [c for c in self.gh.calls if c[0] is g.HISTORY_Q and c[3]["name"] == "away"]
-        self.assertEqual(len(away), 1)
+    def test_excluded_repo_is_never_read(self):
+        # listed by a trusted source, but forges my authorship: no history, no diffs
+        farming = [c for c in self.gh.calls if (c[0] is g.HISTORY_Q and c[3]["name"] == "farming")
+                   or (c[0] == "REST" and "farming" in c[1])]
+        self.assertEqual(farming, [])
+
+    def test_commit_search_is_not_a_source(self):
+        self.assertFalse(any(c[0] == "REST" and "/search/" in c[1] for c in self.gh.calls))
 
     def test_merge_commits_add_no_language_bytes(self):
         self.assertNotIn("C++", self.data["contrib_langs"])
@@ -230,31 +230,6 @@ class HelpersTest(unittest.TestCase):
         self.assertEqual(len(calls), 2)
         self.assertEqual(out["Python"], 100 * 2 + 3)
 
-
-class SearchWindowTest(unittest.TestCase):
-    def test_window_over_1000_hits_is_split(self):
-        windows = []
-
-        def rest(path, private=False):
-            q = urllib.parse.unquote(path.split("q=")[1].split("&")[0])
-            span = q.split("author-date:")[1]
-            windows.append(span)
-            a, b = (dt.date.fromisoformat(x) for x in span.split(".."))
-            hits = 1500 if (b - a).days > 200 else 5
-            item = {"repository": {"full_name": f"o/{a.year}", "name": str(a.year), "owner": {"login": "o"},
-                                   "private": False, "fork": False, "description": None, "html_url": "u"}}
-            return {"total_count": hits, "items": [item] * min(hits, 5)}
-
-        with mock.patch.object(g, "rest", rest), mock.patch.object(g, "SEARCH_PAUSE", 0):
-            repos = g.search_commit_repos(dt.date(2025, 1, 1), dt.date(2025, 12, 31))
-        def days(span):
-            a, b = (dt.date.fromisoformat(x) for x in span.split(".."))
-            return (b - a).days
-
-        self.assertEqual(windows[0], "2025-01-01..2025-12-31")
-        self.assertGreater(len(windows), 2)                                  # it was split
-        self.assertTrue(all(days(w) < days(windows[0]) for w in windows[1:]))
-        self.assertEqual({r["owner"]["login"] for r in repos}, {"o"})
 
 
 class ApiErrorTest(unittest.TestCase):
