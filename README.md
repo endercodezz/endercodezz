@@ -37,13 +37,13 @@ I like making software run where it was never meant to: a PSP game on a New 3DS,
 
 | | |
 |---|---|
-| Last year | 1,149 contributions (incl. 303 private, counted anonymously) on 57 active days |
-| Breakdown | 734 commits across public and private repos · 110 public pull requests · 275 public issues |
-| Releases | 24 published since Aug 2026 · 811 asset downloads |
-| Commit rhythm | busiest hour Fri 20:00 UTC · 17% between 00:00 and 06:00 UTC · 30% on weekends |
-| Languages | C++ 42.3% · C# 21.5% · Python 16.2% · C 6.5% · TypeScript 5.4% · HTML 1.8% · JavaScript 1.3% · PowerShell 0.9% · Zig 0.9% · Rust 0.4% · Other 2.7% |
+| Last year | 1,165 contributions (incl. 310 private, counted anonymously) on 57 active days |
+| Breakdown | 740 commits across public and private repos · 113 public pull requests · 281 public issues |
+| Releases | 24 published since Aug 2026 · 821 asset downloads |
+| Commit rhythm | busiest hour Fri 20:00 UTC · 17% between 00:00 and 06:00 UTC · 31% on weekends |
+| Languages | C++ 41.7% · C# 21.2% · Python 16.0% · C 6.4% · TypeScript 5.4% · HTML 1.8% · Rust 1.8% · JavaScript 1.3% · Zig 0.8% · Other 3.5% |
 
-<sub>Generated 2026-11-07 09:48 UTC from the GitHub API.</sub>
+<sub>Generated 2026-11-07 15:13 UTC from the GitHub API.</sub>
 </details>
 <!-- numbers:end -->
 
