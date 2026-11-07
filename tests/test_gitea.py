@@ -223,6 +223,19 @@ class GiteaTest(unittest.TestCase):
 
 
 class ApiTest(unittest.TestCase):
+    def test_existing_public_readme_prose_is_preserved_but_new_private_values_fail(self):
+        before = 'Public framework\n<!-- numbers:start -->\nold\n<!-- numbers:end -->\n'
+        after = before.replace('old\n', '123 commits\n')
+        with mock.patch("sys.stdout", new_callable=io.StringIO):
+            g.leak_check({"README.md": after}, {"framework"}, public_readme=before)
+        with self.assertRaises(SystemExit):
+            g.leak_check({"README.md": after.replace('123 commits', 'private-project')},
+                         {"private-project"}, public_readme=before)
+        with self.assertRaisesRegex(SystemExit, 'outside the generated block'):
+            g.leak_check({"README.md": after + 'private-project'}, {"private-project"}, public_readme=before)
+        with mock.patch.object(g, "GITEA_TOKEN", "token-value"), self.assertRaises(SystemExit):
+            g.leak_check({"README.md": after.replace('Public', 'token-value')}, set(), public_readme=before)
+
     def test_aggregate_schema_language_keys_and_numbers_are_not_repo_metadata(self):
         public = {"providers": {"gitea": {"status": "authenticated", "raw": {
             "repositories": 352, "personal_commits": 352,

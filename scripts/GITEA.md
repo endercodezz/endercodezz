@@ -46,6 +46,9 @@ The JSON privacy scan checks string values and unexpected keys. Static schema
 labels, validated language-counter labels, numeric counts and ISO activity-date
 keys are not interpreted as repository metadata; tokens are checked against the
 entire output, including keys. Invalid aggregate shapes stop publication.
+For README generation, its existing public prose and links must remain byte for
+byte unchanged outside the generated numbers block. Private metadata scanning
+applies to the new block; token scanning still covers the entire document.
 
 `assets/stats.json` exposes only aggregate provider counters, language byte
 totals, dated activity, mirror exclusions and measurement diagnostics. No private

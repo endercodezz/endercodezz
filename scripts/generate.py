@@ -1080,7 +1080,7 @@ def stats_private_strings(value, path=()):
         yield value
 
 
-def leak_check(files: dict[str, str], secrets: set[str]) -> None:
+def leak_check(files: dict[str, str], secrets: set[str], public_readme: str | None = None) -> None:
     """Abort before writing if any private name, description or URL is in the output.
 
     The message never says which secret matched (Actions logs are public).
@@ -1093,6 +1093,16 @@ def leak_check(files: dict[str, str], secrets: set[str]) -> None:
         if any(token and token in content for token in (GITEA_TOKEN, TOKEN if TOKEN and len(TOKEN) >= 20 else None)) or token_shape.search(content):
             sys.exit(f"leak check failed in {fname}: a token was found; nothing was written")
         hay = content.lower()
+        if fname == "README.md" and public_readme is not None:
+            block = r"(<!-- numbers:start -->\n)(.*?)(<!-- numbers:end -->)"
+            before = re.search(block, public_readme, re.S)
+            after = re.search(block, content, re.S)
+            if not before or not after or re.sub(block, "", public_readme, flags=re.S) != re.sub(block, "", content, flags=re.S):
+                sys.exit("README changed outside the generated block; nothing was written")
+            # Existing public prose/links can share words with private metadata.
+            # The generator never changes those bytes. Scan all newly generated
+            # content; the full document was already scanned for tokens above.
+            hay = after.group(2).lower()
         payload = None
         if fname == "stats.json":
             try:
@@ -1141,6 +1151,7 @@ def main():
 
     readme = ROOT / "README.md"
     src = readme.read_text("utf-8")
+    public_readme = src
     block = numbers_block(act, langs, rhythm, ship, data.get("providers"))
     src, n = re.subn(r"(<!-- numbers:start -->\n).*?(<!-- numbers:end -->)",
                      lambda m: m.group(1) + block + "\n" + m.group(2), src, flags=re.S)
@@ -1148,7 +1159,7 @@ def main():
         sys.exit("README is missing the <!-- numbers:start/end --> markers")
 
     out["stats.json"] = export_json(data, act, langs, rhythm, ship)
-    leak_check({**out, "README.md": src}, data["secrets"])
+    leak_check({**out, "README.md": src}, data["secrets"], public_readme)
     ASSETS.mkdir(exist_ok=True)
     for old in [*ASSETS.glob("*.svg"), *ASSETS.glob("*.json")]:
         if old.name not in out:
