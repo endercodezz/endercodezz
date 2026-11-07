@@ -42,11 +42,11 @@ I like making software run where it was never meant to: a PSP game on a New 3DS,
 | Unique commits | 945 · GitHub + Gitea |
 | GitHub public activity | 113 pull requests · 281 issues |
 | Daily development activity | busiest day 2026-11-03: 207 events · 79% in the last 30 days |
-| Releases | 41 published since Aug 2026 · 885 asset downloads |
+| Releases | 41 published since Aug 2026 · 886 asset downloads |
 | Commit rhythm | busiest hour Wed 01:00 UTC · 17% between 00:00 and 06:00 UTC · 28% on weekends |
 | Languages | C++ 44.5% · C# 27.2% · Python 14.0% · C 5.2% · TypeScript 3.3% · HTML 1.1% · Rust 1.0% · JavaScript 1.0% · Zig 0.5% · Other 2.3% |
 
-<sub>Generated 2026-11-07 21:16 UTC. Sources: GitHub + Gitea. Heatmap events are GitHub contributions plus additional personal Gitea commits, deduplicated by SHA after mirror exclusion. GitHub's original contribution calendar is reported separately.</sub>
+<sub>Generated 2026-11-07 21:39 UTC. Sources: GitHub + Gitea. Heatmap events are GitHub contributions plus additional personal Gitea commits, deduplicated by SHA after mirror exclusion. GitHub's original contribution calendar is reported separately.</sub>
 </details>
 <!-- numbers:end -->
 
