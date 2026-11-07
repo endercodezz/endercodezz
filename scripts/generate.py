@@ -29,6 +29,9 @@ import math
 import os
 import re
 import sys
+import time
+import urllib.error
+import urllib.parse
 import urllib.request
 from collections import Counter, defaultdict
 from html import escape
@@ -74,7 +77,13 @@ T = THEMES["dark"]          # current theme, switched by render_all()
 
 
 # ---------------------------------------------------------------- GitHub API
-def gql(query: str, private: bool = False, **variables):
+SKIPPABLE = {"NOT_FOUND", "FORBIDDEN"}   # deleted, renamed away, or access revoked
+
+
+def gql(query: str, private: bool = False, missing_ok: bool = False, **variables):
+    """GraphQL call. With missing_ok, NOT_FOUND / FORBIDDEN errors (a repository that
+    no longer exists or is no longer readable) return the partial data instead of
+    aborting; the caller sees `repository: None` and skips it."""
     req = urllib.request.Request(
         "https://api.github.com/graphql",
         data=json.dumps({"query": query, "variables": variables}).encode(),
@@ -85,15 +94,36 @@ def gql(query: str, private: bool = False, **variables):
             payload = json.load(r)
     except Exception as e:
         raise SystemExit("GitHub API request failed" + ("" if private else f": {e}"))
-    if payload.get("errors"):
-        raise SystemExit("GraphQL error" + (" in a private-repo query" if private else f": {payload['errors']}"))
-    return payload["data"]
+    errors = payload.get("errors")
+    if errors and not (missing_ok and all(e.get("type") in SKIPPABLE for e in errors)):
+        raise SystemExit("GraphQL error" + (" in a private-repo query" if private else f": {errors}"))
+    return payload.get("data") or {}
+
+
+def rest(path: str, private: bool = False):
+    """REST GET. Returns None for repositories/commits that are gone or unreadable
+    (404, 409 empty repo, 410, 422, 451, or a 403 that is not a rate limit)."""
+    req = urllib.request.Request(
+        f"https://api.github.com{path}",
+        headers={"Authorization": f"bearer {TOKEN}", "User-Agent": "profile-readme-generator",
+                 "Accept": "application/vnd.github+json"},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=60) as r:
+            return json.load(r)
+    except urllib.error.HTTPError as e:
+        limited = e.code in (403, 429) and e.headers.get("X-RateLimit-Remaining") == "0"
+        if e.code in (403, 404, 409, 410, 422, 451) and not limited:
+            return None
+        raise SystemExit("GitHub REST request failed" + ("" if private else f": {e.code} {path}"))
+    except Exception as e:
+        raise SystemExit("GitHub REST request failed" + ("" if private else f": {e}"))
 
 
 PROFILE_Q = """
 query($login: String!) {
   user(login: $login) {
-    id
+    id createdAt
     contributionsCollection {
       totalCommitContributions totalIssueContributions totalPullRequestContributions
       totalPullRequestReviewContributions restrictedContributionsCount
@@ -133,13 +163,32 @@ query($after: String) {
 }"""
 
 HISTORY_Q = """
-query($owner: String!, $name: String!, $author: ID!, $since: GitTimestamp!, $after: String) {
+query($owner: String!, $name: String!, $author: ID!, $after: String) {
   repository(owner: $owner, name: $name) {
     defaultBranchRef { target { ... on Commit {
-      history(first: 100, after: $after, since: $since, author: {id: $author}) {
-        totalCount pageInfo { hasNextPage endCursor } nodes { authoredDate }
+      history(first: 100, after: $after, author: {id: $author}) {
+        totalCount pageInfo { hasNextPage endCursor } nodes { oid authoredDate }
       }
     } } }
+  }
+}"""
+
+# Repositories owned by someone else (users or organisations) that I committed to.
+# Two sources, because each misses some: the contribution graph (last year, max
+# 100 repos, no pagination) and repositoriesContributedTo (paginated).
+EXTERNAL_Q = """
+query($login: String!, $after: String) {
+  user(login: $login) {
+    repositoriesContributedTo(first: 100, after: $after, includeUserRepositories: false,
+                              contributionTypes: [COMMIT, PULL_REQUEST]) {
+      pageInfo { hasNextPage endCursor }
+      nodes { name owner { login } isPrivate isFork description url }
+    }
+    contributionsCollection {
+      commitContributionsByRepository(maxRepositories: 100) {
+        repository { name owner { login } isPrivate isFork description url }
+      }
+    }
   }
 }"""
 
@@ -151,19 +200,151 @@ query($owner: String!, $name: String!, $author: ID!) {
 }"""
 
 
-def commit_times(repo: str, author: str, since: str, owner: str = USER,
-                 private: bool = False) -> list[dt.datetime]:
+def my_commits_in(repo: str, author: str, owner: str = USER,
+                  private: bool = False) -> list[tuple[str, dt.datetime]]:
+    """(sha, authored date) of every commit I authored on the default branch.
+    Paginated; a repository that is gone, unreadable or empty yields []."""
     out, after = [], None
     while True:
-        d = gql(HISTORY_Q, private=private, owner=owner, name=repo, author=author, since=since, after=after)
-        ref = (d["repository"] or {}).get("defaultBranchRef")
+        d = gql(HISTORY_Q, private=private, missing_ok=True, owner=owner, name=repo, author=author, after=after)
+        ref = (d.get("repository") or {}).get("defaultBranchRef")
         if not ref:
             return out
         h = ref["target"]["history"]
-        out += [dt.datetime.fromisoformat(n["authoredDate"].replace("Z", "+00:00")) for n in h["nodes"]]
+        out += [(n["oid"], dt.datetime.fromisoformat(n["authoredDate"].replace("Z", "+00:00"))) for n in h["nodes"]]
         if not h["pageInfo"]["hasNextPage"]:
             return out
         after = h["pageInfo"]["endCursor"]
+
+
+SEARCH_PAUSE = 2.1    # seconds; the commit search API allows 30 requests per minute
+
+
+def search_commit_repos(start: dt.date, end: dt.date) -> list[dict]:
+    """Repos where GitHub commit search finds commits I authored. This catches repos
+    the contribution graph ignores (commits to a repo I never forked, starred, or
+    opened an issue/PR in). A date window with more than 1000 hits (the search
+    cap) is split in half."""
+    found: dict[str, dict] = {}
+
+    def window(a: dt.date, b: dt.date) -> None:
+        for page in range(1, 11):
+            q = urllib.parse.quote(f"author:{USER} author-date:{a.isoformat()}..{b.isoformat()}")
+            res = rest(f"/search/commits?q={q}&per_page=100&page={page}")
+            time.sleep(SEARCH_PAUSE)
+            if res is None:
+                return
+            if page == 1 and res.get("total_count", 0) > 1000 and a < b:
+                mid = a + (b - a) / 2
+                window(a, mid)
+                window(mid + dt.timedelta(days=1), b)
+                return
+            items = res.get("items") or []
+            for it in items:
+                r = it["repository"]
+                found.setdefault(r["full_name"].lower(), {
+                    "name": r["name"], "owner": {"login": r["owner"]["login"]}, "isPrivate": r["private"],
+                    "isFork": r["fork"], "description": r.get("description"), "url": r.get("html_url")})
+            if len(items) < 100:
+                return
+
+    window(start, end)
+    return list(found.values())
+
+
+def external_repos(created: dt.date | None = None) -> list[dict]:
+    """Other people's / organisations' repos I contributed to, de-duplicated."""
+    found, after = {}, None
+    if created:
+        for r in search_commit_repos(created, NOW.date()):
+            if r["owner"]["login"].lower() != USER.lower():
+                found.setdefault(f"{r['owner']['login']}/{r['name']}".lower(), r)
+    while True:
+        u = gql(EXTERNAL_Q, missing_ok=True, login=USER, after=after).get("user") or {}
+        nodes = list((u.get("repositoriesContributedTo") or {}).get("nodes") or [])
+        if after is None:
+            nodes += [c["repository"] for c in
+                      (u.get("contributionsCollection") or {}).get("commitContributionsByRepository") or []]
+        for r in nodes:
+            if r and r["owner"]["login"].lower() != USER.lower():
+                found.setdefault(f"{r['owner']['login']}/{r['name']}".lower(), r)
+        page = (u.get("repositoriesContributedTo") or {}).get("pageInfo") or {}
+        if not page.get("hasNextPage"):
+            return list(found.values())
+        after = page["endCursor"]
+
+
+# ---------------------------------------------------------------- my code in other repos
+# File extension -> Linguist language. Prose, data and config files are not
+# programming languages and Linguist leaves them out of language stats too.
+EXT_LANG = {
+    ".c": "C", ".h": "C", ".cpp": "C++", ".cc": "C++", ".cxx": "C++", ".hpp": "C++", ".hh": "C++",
+    ".hxx": "C++", ".inl": "C++", ".cs": "C#", ".py": "Python", ".pyw": "Python", ".ts": "TypeScript",
+    ".tsx": "TypeScript", ".mts": "TypeScript", ".js": "JavaScript", ".jsx": "JavaScript", ".mjs": "JavaScript",
+    ".cjs": "JavaScript", ".rs": "Rust", ".zig": "Zig", ".go": "Go", ".java": "Java", ".kt": "Kotlin",
+    ".lua": "Lua", ".sh": "Shell", ".bash": "Shell", ".ps1": "PowerShell", ".psm1": "PowerShell",
+    ".bat": "Batchfile", ".cmd": "Batchfile", ".cmake": "CMake", ".html": "HTML", ".htm": "HTML",
+    ".css": "CSS", ".scss": "SCSS", ".glsl": "GLSL", ".vert": "GLSL", ".frag": "GLSL", ".m": "Objective-C",
+    ".mm": "Objective-C++", ".swift": "Swift", ".nix": "Nix", ".rb": "Ruby", ".php": "PHP", ".dart": "Dart",
+    ".gd": "GDScript", ".vue": "Vue", ".svelte": "Svelte", ".asm": "Assembly", ".s": "Assembly",
+}
+NAME_LANG = {"cmakelists.txt": "CMake", "dockerfile": "Dockerfile", "makefile": "Makefile"}
+# Linguist colours for languages that may only show up through contributions.
+LANG_COLOR = {
+    "C": "#555555", "C++": "#f34b7d", "C#": "#178600", "Python": "#3572A5", "TypeScript": "#3178c6",
+    "JavaScript": "#f1e05a", "Rust": "#dea584", "Zig": "#ec915c", "Go": "#00ADD8", "Java": "#b07219",
+    "Kotlin": "#A97BFF", "Lua": "#000080", "Shell": "#89e051", "PowerShell": "#012456", "Batchfile": "#C1F12E",
+    "CMake": "#DA3434", "HTML": "#e34c26", "CSS": "#663399", "SCSS": "#c6538c", "GLSL": "#5686a5",
+    "Objective-C": "#438eff", "Objective-C++": "#6866fb", "Swift": "#F05138", "Nix": "#7e7eff",
+    "Ruby": "#701516", "PHP": "#4F5D95", "Dart": "#00B4AB", "GDScript": "#355570", "Vue": "#41b883",
+    "Svelte": "#ff3e00", "Assembly": "#6E4C13", "Dockerfile": "#384d54", "Makefile": "#427819",
+}
+VENDOR = re.compile(r"(^|/)(vendor|third[_-]?party|node_modules|external|deps|dist|build)/", re.I)
+
+
+def language_of(path: str) -> str | None:
+    if VENDOR.search(path):
+        return None                      # Linguist treats vendored code as not mine either
+    name = path.rsplit("/", 1)[-1].lower()
+    if name in NAME_LANG:
+        return NAME_LANG[name]
+    dot = name.rfind(".")
+    return EXT_LANG.get(name[dot:]) if dot > 0 else None
+
+
+def added_bytes(patch: str) -> int:
+    """Bytes of the lines a diff adds (what I wrote), not the whole file."""
+    return sum(len(line[1:].encode()) + 1 for line in patch.splitlines()
+               if line.startswith("+") and not line.startswith("+++"))
+
+
+def commit_languages(owner: str, name: str, sha: str, private: bool, stats: Counter) -> Counter:
+    """Language -> bytes I added in one commit. Paginates the file list. Files
+    without a textual patch (binary, or too large for the API) are counted in
+    stats['unmeasured'] and contribute nothing rather than an estimate."""
+    out = Counter()
+    for page in range(1, 31):               # the API serves at most 3000 files
+        c = rest(f"/repos/{owner}/{name}/commits/{sha}?per_page=100&page={page}", private=private)
+        if c is None:
+            stats["unavailable"] += 1
+            return out
+        if page == 1 and len(c.get("parents") or []) > 1:
+            # A merge's diff is the merged branch: code already counted in its own
+            # commits, or written by someone else. Still a commit, but not my bytes.
+            stats["merges"] += 1
+            return out
+        files = c.get("files") or []
+        for f in files:
+            lang = language_of(f["filename"])
+            if not lang or f.get("status") == "removed":
+                continue
+            if f.get("patch") is None:
+                stats["unmeasured"] += 1
+                continue
+            out[lang] += added_bytes(f["patch"])
+        if len(files) < 100:
+            return out
+    return out
 
 
 def my_commit_count(repo: str, author: str) -> int:
@@ -177,11 +358,18 @@ def collect():
     d = gql(PROFILE_Q, login=USER)["user"]
     author = d["id"]
     repos = [r for r in d["repositories"]["nodes"] if r["name"].lower() != USER.lower()]
-    since = (NOW - dt.timedelta(days=365)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    since = NOW - dt.timedelta(days=365)
 
-    times: list[dt.datetime] = []
+    # Every repository I may have committed to, keyed "owner/name" so a repo reached
+    # through several sources is read once. kind "own" = my non-fork repo (its
+    # languages come from Linguist); "foreign" = my fork or someone else's repo
+    # (only the code I added there counts).
+    sources: dict[str, tuple[str, str, bool, str]] = {}
     for r in repos:
-        times += commit_times(r["name"], author, since)
+        sources[f"{USER}/{r['name']}".lower()] = (USER, r["name"], False, "foreign" if r["isFork"] else "own")
+    # This profile repo is left out of the project lists, but my commits to it are
+    # real commits (the bot's are filtered out by the author filter).
+    sources.setdefault(f"{USER}/{USER}".lower(), (USER, USER, False, "own"))
 
     tracked = {p["repo"] for p in CONFIG["featured"] + CONFIG["more"]}
     my_commits = {r["name"]: my_commit_count(r["name"], author) for r in repos if r["name"] in tracked}
@@ -213,18 +401,54 @@ def collect():
                 own = r["owner"]["login"].lower() == USER.lower()
                 if not own:
                     secrets.add(r["owner"]["login"])
-                # commit rhythm: my commits anywhere I can read
-                times += commit_times(r["name"], author, since, owner=r["owner"]["login"], private=True)
-                # languages and releases: my own repos only, same rule as public ones
+                # languages and releases of my own repos: same rule as public ones
                 if own and not r["isFork"]:
                     private_langs.append(r["languages"]["edges"])
                     releases += releases_of(r, PRIVATE)
+                sources.setdefault(f"{r['owner']['login']}/{r['name']}".lower(),
+                                   (r["owner"]["login"], r["name"], True, "own" if own and not r["isFork"] else "foreign"))
             if not page["pageInfo"]["hasNextPage"]:
                 break
             after = page["pageInfo"]["endCursor"]
+
+    # Other people's and organisations' repos, public and (with an owner token) private.
+    created = dt.date.fromisoformat(d["createdAt"][:10]) if d.get("createdAt") else None
+    for r in external_repos(created):
+        if r["isPrivate"]:
+            secrets.update(filter(None, (r["name"], r["description"], r["url"], r["owner"]["login"],
+                                         f"{r['owner']['login']}/{r['name']}")))
+        sources.setdefault(f"{r['owner']['login']}/{r['name']}".lower(),
+                           (r["owner"]["login"], r["name"], r["isPrivate"], "foreign"))
+
+    # Commits I authored, each SHA once wherever it appears (fork and upstream,
+    # mirrors, a repo reached twice). Commits by others are filtered out by the
+    # API's author filter.
+    commits: dict[str, dt.datetime] = {}
+    own_shas: set[str] = set()
+    foreign: dict[str, tuple[str, str, bool]] = {}
+    for owner, name, private, kind in sources.values():
+        for sha, when in my_commits_in(name, author, owner=owner, private=private):
+            commits.setdefault(sha, when)
+            if kind == "own":
+                own_shas.add(sha)
+            else:
+                foreign.setdefault(sha, (owner, name, private))
+    times = [t for t in commits.values() if t >= since]
+
+    # Languages of my code in forks and other people's repos: bytes my commits add.
+    # A commit that also lives in one of my own repos is already in Linguist's numbers.
+    contrib_langs, lang_stats = Counter(), Counter()
+    for sha, (owner, name, private) in foreign.items():
+        if sha in own_shas:
+            continue
+        lang_stats["commits"] += 1
+        contrib_langs.update(commit_languages(owner, name, sha, private, lang_stats))
+    print(f"my code in forks and other repos: {lang_stats['commits']} commits, "
+          f"{sum(contrib_langs.values())} bytes added, {lang_stats['unmeasured']} files without a diff, "
+          f"{lang_stats['merges']} merges skipped, {lang_stats['unavailable']} commits unavailable")
     return {"cc": d["contributionsCollection"], "repos": repos, "times": times,
             "my_commits": my_commits, "releases": releases, "private_langs": private_langs,
-            "has_private": has_private, "secrets": secrets}
+            "contrib_langs": contrib_langs, "has_private": has_private, "secrets": secrets}
 
 
 # ---------------------------------------------------------------- svg helpers
@@ -490,6 +714,10 @@ def panel_languages(data) -> tuple[str, list]:
         for e in edges:
             size[e["node"]["name"]] += e["size"]
             colors[e["node"]["name"]] = e["node"]["color"] or T["other"]
+    # plus the code I wrote in forks and other people's repos (bytes my commits add)
+    for lang, b in data.get("contrib_langs", {}).items():
+        size[lang] += b
+        colors.setdefault(lang, LANG_COLOR.get(lang) or T["other"])
     tot = sum(size.values()) or 1
     top = size.most_common(8)
     # Highlighted languages (profile.json) get their own row with their real share,
@@ -505,7 +733,7 @@ def panel_languages(data) -> tuple[str, list]:
     nrows = math.ceil(len(rows) / cols)
     h = 112 + nrows * 28
     scope = "own repos, public and private" if data["has_private"] else "own public repos"
-    parts = [box(W, h), *box_header(W, "Languages", f"share of bytes · {scope} · forks excluded")]
+    parts = [box(W, h), *box_header(W, "Languages", f"share of bytes · {scope} + my commits in other repos")]
     # GitHub's repo language bar: 8px, rounded ends, hairline gaps
     bx0, bx1, by = 20, W - 20, 76
     parts.append(f'<clipPath id="bar"><rect x="{bx0}" y="{by}" width="{bx1 - bx0}" height="8" rx="4"/></clipPath>'
@@ -765,7 +993,9 @@ def leak_check(files: dict[str, str], secrets: set[str]) -> None:
     needles = [s.lower() for s in secrets if len(s) >= 3]
     token_shape = re.compile(r"\b(gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,})")
     for fname, content in files.items():
-        if (TOKEN and TOKEN in content) or token_shape.search(content):
+        # The literal token is only searched when it looks like a real one: a short
+        # placeholder would match ordinary words ("test" in "Latest").
+        if (TOKEN and len(TOKEN) >= 20 and TOKEN in content) or token_shape.search(content):
             sys.exit(f"leak check failed in {fname}: a token was found; nothing was written")
         hay = content.lower()
         for s in needles:

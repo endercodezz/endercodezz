@@ -10,6 +10,7 @@ on:
     branches: [main]
     paths:
       - "scripts/**"
+      - "tests/**"
       - ".github/workflows/refresh.yml"
 
 permissions:
@@ -28,6 +29,10 @@ jobs:
     steps:
       # Pinned to a commit SHA (v7.0.1). This step does not see STATS_TOKEN.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Unit tests
+        # Offline (fake GitHub API); runs without any token.
+        run: python3 -m unittest discover -s tests
 
       - name: Render panels
         # The secret is scoped to this single step, which runs only our own
