@@ -59,9 +59,23 @@ account. Shared commits are measured once, with full owned-repository sizes
 taking precedence over patch bytes.
 
 GitHub's contribution calendar and its PR/issue metrics retain their original
-meaning. Commit rhythm, language shares and private release aggregates include
-deduplicated Gitea data when authenticated. Gitea commit activity is also exported
-separately by date. Card identities and layouts remain unchanged.
+meaning. The Development activity heatmap adds personal canonical Gitea commits
+only after excluding SHAs already present in GitHub history. It aggregates UTC
+dates within the original GitHub calendar window. Active days, busiest day and
+last-30-day figures use this mixed development-event series, not a fabricated
+GitHub contribution total. The original GitHub total is displayed separately.
+Commit rhythm, language shares and private release aggregates also include
+deduplicated Gitea data when authenticated.
+
+The legacy `contributions.total`, `contributions.active_days`, `start` and
+`counts` JSON fields remain GitHub-only. The existing `contributions.commits`
+field continues to describe unique commits across the available providers;
+`calendar_source` and `commit_sources` make that distinction explicit.
+`github_calendar` exposes the original series, while `activity` contains the
+combined counts, dates, per-provider components, event units and day statistics.
+Provider `additional_activity` records the SHA-deduplicated Gitea addition;
+existing provider activity fields remain available for compatibility.
+All public series contain only aggregate dates and counts, never commit IDs.
 
 When the token is missing, the header, README and JSON explicitly identify a
 GitHub-only result; Gitea totals are null, not fabricated zeroes. Authentication,

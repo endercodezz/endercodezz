@@ -23,7 +23,7 @@ I like making software run where it was never meant to: a PSP game on a New 3DS,
 
 ## By the numbers
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="assets/activity-dark.svg"><source media="(prefers-color-scheme: light)" srcset="assets/activity-light.svg"><img src="assets/activity-dark.svg" width="100%" alt="Contributions per month over the last 12 months"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/activity-dark.svg"><source media="(prefers-color-scheme: light)" srcset="assets/activity-light.svg"><img src="assets/activity-dark.svg" width="100%" alt="Daily development activity from the available providers"></picture>
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="assets/shipping-dark.svg"><source media="(prefers-color-scheme: light)" srcset="assets/shipping-light.svg"><img src="assets/shipping-dark.svg" width="100%" alt="Releases over time, one lane per project"></picture>
 

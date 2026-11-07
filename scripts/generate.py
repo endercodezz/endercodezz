@@ -466,6 +466,7 @@ def collect():
               f"{sum(gitea['languages'].values())} language bytes included")
     else:
         print("Gitea: GITEA_TOKEN missing; publishing explicitly GitHub-only statistics")
+    additional_gitea = additional_gitea_activity(gitea["times"], commits)
     times = [t for t in {**gitea["times"], **commits}.values() if t >= since]
 
     # Languages of my code in forks and other people's repos: bytes my commits add.
@@ -486,9 +487,11 @@ def collect():
         "total_repository_commits": sum(repository_totals.values()), "language_bytes": dict(github_languages),
         "releases": len(releases), "downloads": sum(r["downloads"] for r in releases)},
         "gitea": {key: gitea[key] for key in ("status", "raw", "included")}}
-    # Keep GitHub's calendar unchanged: Gitea activity has its own dated counters,
-    # while the commit rhythm, language shares and shipping totals combine both.
+    # Preserve the original provider series. The additional series is computed
+    # while commit identities are still available, after canonical/mirror rules,
+    # and before any aggregation or public export discards SHAs.
     providers["gitea"]["activity"] = dict(sorted(Counter(t.date().isoformat() for t in gitea["times"].values()).items()))
+    providers["gitea"]["additional_activity"] = additional_gitea
     providers["gitea"]["mirrors_excluded"] = gitea.get("mirrors_excluded", 0)
     providers["gitea"]["diagnostics"] = gitea.get("diagnostics", {})
     contrib_langs.update(gitea["languages"])
@@ -497,7 +500,17 @@ def collect():
             "my_commits": my_commits, "total_commits": total_commits,
             "releases": releases, "private_langs": private_langs,
             "contrib_langs": contrib_langs, "has_private": has_private, "secrets": secrets,
-            "providers": providers}
+            "providers": providers, "additional_gitea_activity": additional_gitea}
+
+
+def additional_gitea_activity(canonical_times, github_commits):
+    """Daily UTC counts of canonical personal Gitea SHAs absent from GitHub.
+
+    canonical_times is already a SHA-keyed dictionary, excluding mirror copies.
+    Never try to deduplicate daily aggregate counts: their identities are lost.
+    """
+    return dict(sorted(Counter(when.astimezone(dt.timezone.utc).date().isoformat()
+        for sha, when in canonical_times.items() if sha not in github_commits).items()))
 
 
 # ---------------------------------------------------------------- svg helpers
@@ -699,41 +712,63 @@ def panel_header(data) -> str:
     return svg(W, h, "\n".join(parts), "enderlit (endercodezz): ports, recompilers and desktop tools")
 
 
+def development_activity(data):
+    """A new calendar, never a mutation of GitHub's contribution calendar.
+
+    Counts are heterogeneous development events: original GitHub contributions
+    plus additional personal Gitea commits. UTC days and the exact GitHub
+    calendar window keep the two public series directly comparable.
+    """
+    authenticated = data.get("providers", {}).get("gitea", {}).get("status") == "authenticated"
+    if authenticated and "additional_gitea_activity" not in data:
+        raise SystemExit("Deduplicated Gitea activity unavailable; nothing was written")
+    extra = data.get("additional_gitea_activity", {}) if authenticated else {}
+    weeks = []
+    for week in data["cc"]["contributionCalendar"]["weeks"]:
+        days = []
+        for day in week["contributionDays"]:
+            github, gitea = day["contributionCount"], extra.get(day["date"], 0)
+            days.append({**day, "github_contributions": github, "gitea_commits": gitea,
+                         "contributionCount": github + gitea})
+        weeks.append({"contributionDays": days})
+    days = sorted((day for week in weeks for day in week["contributionDays"]), key=lambda day: day["date"])
+    total = sum(day["contributionCount"] for day in days)
+    peak = max(days, key=lambda day: day["contributionCount"]) if total else None
+    cutoff = (dt.date.fromisoformat(days[-1]["date"]) - dt.timedelta(days=29)).isoformat() if days else ""
+    last30 = sum(day["contributionCount"] for day in days if day["date"] >= cutoff)
+    return {"weeks": weeks, "days": days, "total": total,
+            "source": "GitHub + Gitea" if authenticated else "GitHub",
+            "active": sum(day["contributionCount"] > 0 for day in days), "peak": peak,
+            "last30_total": last30, "last30_share": round(100 * last30 / total) if total else 0,
+            "gitea_commits": sum(day["gitea_commits"] for day in days),
+            "github_active": sum(day["github_contributions"] > 0 for day in days)}
+
+
 def panel_activity(data) -> tuple[str, dict]:
     cc = data["cc"]
     cal = cc["contributionCalendar"]
-    weeks = cal["weeks"]
-    days = [x for w in weeks for x in w["contributionDays"]]
+    activity = development_activity(data)
+    weeks, days = activity["weeks"], activity["days"]
     total = cal["totalContributions"]
     private = cc["restrictedContributionsCount"]
-    active = sum(1 for x in days if x["contributionCount"])
-    peak = max(days, key=lambda x: x["contributionCount"])
-    last30 = sum(x["contributionCount"] for x in days[-30:])
-    share = round(100 * last30 / total) if total else 0
-
-    head_label = "contributions" if private else "public contributions"
-    note = (f"incl. {fmt(private)} in private repos, counted anonymously" if private
-            else "public repos only · private contributions are hidden on this profile")
-    # Commits: with a private-capable token, count my commits on the default
-    # branches of every repo it can read (the same set as the rhythm panel).
-    # PR and issue counts from the API never include private repos.
+    active, peak, share = activity["active"], activity["peak"], activity["last30_share"]
+    head_label = "GitHub contributions" if private else "GitHub public contributions"
+    combined = activity["source"] == "GitHub + Gitea"
+    note = ("GitHub + Gitea · contributions + additional commits" if combined else provider_scope(data))
     full = data["has_private"] or data.get("providers", {}).get("gitea", {}).get("status") == "authenticated"
-    commits = len(data["times"]) if full else cc["totalCommitContributions"]
-    pre = "public " if (private or full) else ""
-    commit_label = "commits, both hosts" if data.get("providers", {}).get("gitea", {}).get("status") == "authenticated" else (
-        "commits, all repos" if full else pre + "commits")
-    items = [(fmt(total), head_label),
-             (fmt(commits), commit_label),
-             (fmt(cc["totalPullRequestContributions"]), pre + "pull requests"),
-             (fmt(cc["totalIssueContributions"]), pre + "issues"), (fmt(active), "active days")]
-
-    h = 336
-    parts = [box(W, h), *box_header(W, "GitHub contributions in the last year", note),
-             *counters(28, 100, items, W - 40)]
+    commits = len(data["times"])
+    items = [(fmt(activity["total"]), "development activity events"),
+             (fmt(commits), "unique commits · " + activity["source"]), (fmt(active), "active days")]
+    github_items = [(fmt(total), "GitHub contributions" + (f" · {fmt(private)} private" if private else "")),
+                    (fmt(cc["totalPullRequestContributions"]), "GitHub public pull requests"),
+                    (fmt(cc["totalIssueContributions"]), "GitHub public issues")]
+    h = 400
+    parts = [box(W, h), *box_header(W, "Development activity", note),
+             *counters(28, 100, items, W - 40), *counters(28, 164, github_items, W - 40)]
 
     # heatmap, GitHub calendar geometry
     cell, gap = 11, 3
-    gx, gy = 58, 168
+    gx, gy = 58, 232
     lv = levels([x["contributionCount"] for x in days])
     k = 0
     last_month = None
@@ -752,15 +787,20 @@ def panel_activity(data) -> tuple[str, dict]:
     for i, name in ((1, "Mon"), (3, "Wed"), (5, "Fri")):
         parts.append(text(28, gy + i * (cell + gap) + 9, name, "f mu", 12))
     base = gy + 7 * (cell + gap) + 16
-    pd = dt.date.fromisoformat(peak["date"])
-    parts.append(text(28, base + 9, f"Busiest day: {fmt(peak['contributionCount'])} on {pd:%b} {pd.day}"
-                      f" · {share}% of the year in the last 30 days", "f mu", 12))
+    if peak:
+        pd = dt.date.fromisoformat(peak["date"])
+        busiest = f"Busiest day: {fmt(peak['contributionCount'])} events on {pd:%b} {pd.day}"
+    else:
+        busiest = "No development activity in this window"
+    parts.append(text(28, base + 9, busiest + f" · {share}% of activity in the last 30 days", "f mu", 12))
     parts += legend(W - 20, base)
 
     stats = {"total": total, "private": private, "label": head_label, "active": active,
              "commits": commits, "commits_all": full, "prs": cc["totalPullRequestContributions"],
-             "issues": cc["totalIssueContributions"], "peak": peak, "last30_share": share}
-    return svg(W, h, "\n".join(parts), f"{total} {head_label} in the last year"), stats
+             "issues": cc["totalIssueContributions"], "peak": peak, "last30_share": share,
+             "github_active": activity["github_active"], "activity": activity}
+    return svg(W, h, "\n".join(parts), f"Development activity · {activity['source']}: "
+               f"{activity['total']} events on {active} active days"), stats
 
 
 def panel_languages(data) -> tuple[str, list]:
@@ -1012,8 +1052,9 @@ def export_json(data, act, langs, rhythm, ship) -> str:
     payload = {
         "v": 1, "generated": NOW.isoformat(timespec="seconds"), "user": USER,
         "contributions": {
-            "total": act["total"], "private": act["private"], "active_days": act["active"],
+            "total": act["total"], "private": act["private"], "active_days": act["github_active"],
             "commits": act["commits"], "commits_all_repos": act["commits_all"],
+            "calendar_source": "GitHub", "commit_sources": act["activity"]["source"],
             "pull_requests": act["prs"], "issues": act["issues"],
             "start": days[0]["date"], "counts": [x["contributionCount"] for x in days],
         },
@@ -1026,6 +1067,25 @@ def export_json(data, act, langs, rhythm, ship) -> str:
         "projects": projects, "other_repos": others,
         "providers": data.get("providers", {}),
     }
+    activity = act["activity"]
+    peak = activity["peak"]
+    payload["github_calendar"] = {"source": "GitHub", "total": act["total"],
+        "private": act["private"], "active_days": act["github_active"],
+        "start": days[0]["date"] if days else None, "end": days[-1]["date"] if days else None,
+        "counts": [day["contributionCount"] for day in days]}
+    payload["activity"] = {"source": activity["source"],
+        "unit": "GitHub contributions + additional personal Gitea commits" if activity["source"] == "GitHub + Gitea" else "GitHub contributions",
+        "timezone": "UTC", "total": activity["total"], "active_days": activity["active"],
+        "github_contributions": act["total"], "gitea_commits": activity["gitea_commits"],
+        "unique_commits": act["commits"], "start": days[0]["date"] if days else None,
+        "end": days[-1]["date"] if days else None,
+        "dates": [day["date"] for day in activity["days"]],
+        "counts": [day["contributionCount"] for day in activity["days"]],
+        "github_counts": [day["github_contributions"] for day in activity["days"]],
+        "gitea_counts": [day["gitea_commits"] for day in activity["days"]],
+        "busiest_day": {"date": peak["date"], "count": peak["contributionCount"],
+                        "github_contributions": peak["github_contributions"], "gitea_commits": peak["gitea_commits"]} if peak else None,
+        "last30_total": activity["last30_total"], "last30_share": activity["last30_share"]}
     return json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
 
 
@@ -1034,17 +1094,21 @@ def numbers_block(act, langs, rhythm, ship, providers=None) -> str:
     tot = f"{fmt(act['total'])} {act['label']}"
     if act["private"]:
         tot += f" (incl. {fmt(act['private'])} private, counted anonymously)"
-    commits = f"{fmt(act['commits'])} commits" + (" across public and private repos" if act["commits_all"] else "")
-    pub = "public " if act["commits_all"] or act["private"] else ""
-    lines += [f"| Last year | {tot} on {act['active']} active days |",
-              f"| Breakdown | {commits} · {fmt(act['prs'])} {pub}pull requests · {fmt(act['issues'])} {pub}issues |",
+    activity = act["activity"]
+    peak = activity["peak"]
+    busiest = f"{peak['date']}: {fmt(peak['contributionCount'])} events" if peak else "none"
+    lines += [f"| Development activity | {fmt(activity['total'])} events on {act['active']} active days · {activity['source']} |",
+              f"| GitHub calendar | {tot} on {act['github_active']} GitHub-active days |",
+              f"| Unique commits | {fmt(act['commits'])} · {activity['source']} |",
+              f"| GitHub public activity | {fmt(act['prs'])} pull requests · {fmt(act['issues'])} issues |",
+              f"| Daily development activity | busiest day {busiest} · {activity['last30_share']}% in the last 30 days |",
               f"| Releases | {ship['releases']} published since {ship['since']} · {fmt(ship['downloads'])} asset downloads |",
               f"| Commit rhythm | busiest hour {rhythm['peak']} · {rhythm['night']}% between 00:00 and 06:00 {TZ_LABEL} · {rhythm['weekend']}% on weekends |",
               "| Languages | " + " · ".join(f"{n} {p}%" for n, p, _ in langs) + " |"]
     stamp = NOW.strftime("%Y-%m-%d %H:%M UTC")
     scope = provider_scope({"providers": providers or {}})
     return ("<details>\n<summary>The same numbers as text</summary>\n\n" + "\n".join(lines) +
-            f"\n\n<sub>Generated {stamp}. Sources: {scope}. Contribution calendar: GitHub; commit rhythm, languages and releases: listed sources.</sub>\n</details>")
+            f"\n\n<sub>Generated {stamp}. Sources: {scope}. Heatmap events are GitHub contributions plus additional personal Gitea commits, deduplicated by SHA after mirror exclusion. GitHub's original contribution calendar is reported separately.</sub>\n</details>")
 
 
 def stats_private_strings(value, path=()):
@@ -1059,13 +1123,15 @@ def stats_private_strings(value, path=()):
         "projects featured color_index stars forks total_commits language pushed latest other_repos description "
         "providers github gitea status raw included activity mirrors_excluded diagnostics repositories "
         "personal_commits total_repository_commits language_bytes external_personal_commits merges_skipped "
-        "unavailable_diffs unmeasured_files".split())
+        "unavailable_diffs unmeasured_files additional_activity github_calendar source end unit timezone dates "
+        "github_counts gitea_counts github_contributions gitea_commits unique_commits busiest_day date count "
+        "last30_total last30_share calendar_source commit_sources".split())
     if isinstance(value, dict):
         for key, item in value.items():
             if path and path[-1] == "language_bytes":
                 if not re.fullmatch(r"[\w +#().-]+", key) or not isinstance(item, int) or item < 0:
                     sys.exit("Invalid language aggregate; nothing was written")
-            elif path and path[-1] == "activity":
+            elif path and path[0] == "providers" and path[-1] in ("activity", "additional_activity"):
                 if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", key) or not isinstance(item, int) or item < 0:
                     sys.exit("Invalid activity aggregate; nothing was written")
             elif key not in public_keys:
