@@ -42,6 +42,10 @@ Verified public canonical GitHub names and descriptions remain public when a
 private mirror uses identical metadata. Only exact fields of the identified
 public canonical repository are exempted from the mirror's privacy needles;
 private URLs, alternate names and all existing GitHub private guards remain.
+The JSON privacy scan checks string values and unexpected keys. Static schema
+labels, validated language-counter labels, numeric counts and ISO activity-date
+keys are not interpreted as repository metadata; tokens are checked against the
+entire output, including keys. Invalid aggregate shapes stop publication.
 
 `assets/stats.json` exposes only aggregate provider counters, language byte
 totals, dated activity, mirror exclusions and measurement diagnostics. No private

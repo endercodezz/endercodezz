@@ -223,6 +223,20 @@ class GiteaTest(unittest.TestCase):
 
 
 class ApiTest(unittest.TestCase):
+    def test_aggregate_schema_language_keys_and_numbers_are_not_repo_metadata(self):
+        public = {"providers": {"gitea": {"status": "authenticated", "raw": {
+            "repositories": 352, "personal_commits": 352,
+            "language_bytes": {"Nix": 123, "Rust": 456}, "activity": {"2026-11-07": 352}}}}}
+        with mock.patch("sys.stdout", new_callable=io.StringIO):
+            g.leak_check({"stats.json": json.dumps(public)}, {"repositories", "352", "Nix", "authenticated"})
+
+    def test_private_json_values_and_unexpected_keys_remain_protected(self):
+        for value in ({"projects": [{"name": "hidden-project"}]},
+                      {"providers": {"gitea": {"hidden-project": 1}}},
+                      {"providers": {"gitea": {"raw": {"language_bytes": {"hidden-owner/project": 10}}}}}):
+            with self.assertRaises(SystemExit):
+                g.leak_check({"stats.json": json.dumps(value)}, {"hidden-project", "hidden-owner/project"})
+
     def test_failed_collection_never_writes_public_artifacts(self):
         with mock.patch.object(g, "TOKEN", "test"), \
                 mock.patch.object(g, "collect", side_effect=SystemExit("Gitea authentication/access failed")), \

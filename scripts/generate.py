@@ -1047,6 +1047,39 @@ def numbers_block(act, langs, rhythm, ship, providers=None) -> str:
             f"\n\n<sub>Generated {stamp}. Sources: {scope}. Contribution calendar: GitHub; commit rhythm, languages and releases: listed sources.</sub>\n</details>")
 
 
+def stats_private_strings(value, path=()):
+    """Scan data strings without mistaking aggregate schema keys/counts for names.
+
+    Language counters contain classifier labels, activity counters ISO dates.
+    Unknown structural keys remain scanned, so this cannot hide an identifier
+    accidentally used as a key in a repository record or other new field.
+    """
+    public_keys = set("v generated user contributions total private active_days commits commits_all_repos "
+        "pull_requests issues start counts languages name pct color rhythm grid tz releases repo tag at downloads "
+        "projects featured color_index stars forks total_commits language pushed latest other_repos description "
+        "providers github gitea status raw included activity mirrors_excluded diagnostics repositories "
+        "personal_commits total_repository_commits language_bytes external_personal_commits merges_skipped "
+        "unavailable_diffs unmeasured_files".split())
+    if isinstance(value, dict):
+        for key, item in value.items():
+            if path and path[-1] == "language_bytes":
+                if not re.fullmatch(r"[\w +#().-]+", key) or not isinstance(item, int) or item < 0:
+                    sys.exit("Invalid language aggregate; nothing was written")
+            elif path and path[-1] == "activity":
+                if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", key) or not isinstance(item, int) or item < 0:
+                    sys.exit("Invalid activity aggregate; nothing was written")
+            elif key not in public_keys:
+                yield key
+            if key == "status" and item in ("authenticated", "missing_token"):
+                continue
+            yield from stats_private_strings(item, path + (key,))
+    elif isinstance(value, list):
+        for item in value:
+            yield from stats_private_strings(item, path)
+    elif isinstance(value, str):
+        yield value
+
+
 def leak_check(files: dict[str, str], secrets: set[str]) -> None:
     """Abort before writing if any private name, description or URL is in the output.
 
@@ -1060,18 +1093,20 @@ def leak_check(files: dict[str, str], secrets: set[str]) -> None:
         if any(token and token in content for token in (GITEA_TOKEN, TOKEN if TOKEN and len(TOKEN) >= 20 else None)) or token_shape.search(content):
             sys.exit(f"leak check failed in {fname}: a token was found; nothing was written")
         hay = content.lower()
+        payload = None
+        if fname == "stats.json":
+            try:
+                payload = json.loads(content)
+            except ValueError:
+                pass
+            if isinstance(payload, dict):
+                hay = "\n".join(stats_private_strings(payload)).lower()
         for s in needles:
             if re.search(r"(?<![a-z0-9])" + re.escape(s) + r"(?![a-z0-9])", hay):
                 group = ""
-                if fname == "stats.json":
-                    try:
-                        payload = json.loads(content)
-                    except ValueError:
-                        payload = {}
-                    if not isinstance(payload, dict):
-                        payload = {}
+                if isinstance(payload, dict):
                     for field in ("projects", "other_repos", "providers", "releases", "languages", "contributions", "rhythm"):
-                        if re.search(r"(?<![a-z0-9])" + re.escape(s) + r"(?![a-z0-9])", json.dumps(payload.get(field), ensure_ascii=False).lower()):
+                        if re.search(r"(?<![a-z0-9])" + re.escape(s) + r"(?![a-z0-9])", "\n".join(stats_private_strings(payload.get(field), (field,))).lower()):
                             group = " in " + field
                             break
                 sys.exit(f"leak check failed in {fname}: private repo metadata found{group}; nothing was written")
