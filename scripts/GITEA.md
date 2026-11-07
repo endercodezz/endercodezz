@@ -38,6 +38,11 @@ matching language totals are never used to guess identity. Detected shared
 history without a mapping stops generation, as do missing canonical repositories
 and mapping cycles. SHA deduplication additionally protects commit-level totals.
 
+Verified public canonical GitHub names and descriptions remain public when a
+private mirror uses identical metadata. Only exact fields of the identified
+public canonical repository are exempted from the mirror's privacy needles;
+private URLs, alternate names and all existing GitHub private guards remain.
+
 `assets/stats.json` exposes only aggregate provider counters, language byte
 totals, dated activity, mirror exclusions and measurement diagnostics. No private
 repository records, release tags, paths, URLs, SHAs or code are exported.

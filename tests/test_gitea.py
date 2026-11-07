@@ -106,6 +106,29 @@ class GiteaTest(unittest.TestCase):
         data = self.collect(mirrors={"local-account/mirror-hidden": "github:endercodezz/alpha"})
         self.assertEqual(data["included"]["language_bytes"], {"Rust": 1003})
 
+    def test_public_canonical_name_collision_preserves_private_mirror_identity(self):
+        mirror = self.api.repos[2]
+        mirror["name"] = "alpha"
+        mirror["full_name"] = "local-account/alpha"
+        mirror["description"] = "known public description"
+        self.api.commits["alpha"] = self.api.commits["mirror-hidden"]
+        self.collect(github_public={"endercodezz/alpha": {"alpha", "known public description"}})
+        self.assertNotIn("alpha", self.secrets)
+        self.assertNotIn("known public description", self.secrets)
+        self.assertIn("local-account/alpha", self.secrets)
+        self.assertIn(mirror["html_url"], self.secrets)
+        with mock.patch("sys.stdout", new_callable=io.StringIO):
+            g.leak_check({"stats.json": '{"github_project":"alpha"}'}, self.secrets)
+        with self.assertRaises(SystemExit):
+            g.leak_check({"stats.json": mirror["html_url"]}, self.secrets)
+
+    def test_public_mirror_exception_never_relaxes_existing_github_private_guards(self):
+        self.secrets.add("alpha")
+        mirror = self.api.repos[2]
+        mirror["name"] = "alpha"
+        self.collect(github_public={"endercodezz/alpha": {"alpha"}})
+        self.assertIn("alpha", self.secrets)
+
     def test_push_mirror_metadata_identifies_repository(self):
         self.api.repos[2].pop("original_url")
         self.api.repos[2]["mirror"] = False

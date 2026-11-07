@@ -372,8 +372,11 @@ def collect():
     # languages come from Linguist); "foreign" = my fork or someone else's repo
     # (only the code I added there counts).
     sources: dict[str, tuple[str, str, bool, str]] = {}
+    public_metadata = {}
     for r in repos:
         sources[f"{USER}/{r['name']}".lower()] = (USER, r["name"], False, "foreign" if r["isFork"] else "own")
+        public_metadata[f"{USER}/{r['name']}".lower()] = set(filter(None, (
+            r["name"], r.get("description"), f"{USER}/{r['name']}", f"https://github.com/{USER}/{r['name']}")))
     # This profile repo is left out of the project lists, but my commits to it are
     # real commits (the bot's are filtered out by the author filter).
     sources.setdefault(f"{USER}/{USER}".lower(), (USER, USER, False, "own"))
@@ -427,6 +430,9 @@ def collect():
                                          f"{r['owner']['login']}/{r['name']}")))
         sources.setdefault(f"{r['owner']['login']}/{r['name']}".lower(),
                            (r["owner"]["login"], r["name"], r["isPrivate"], "foreign"))
+        if not r["isPrivate"]:
+            public_metadata[f"{r['owner']['login']}/{r['name']}".lower()] = set(filter(None, (
+                r["name"], r.get("description"), r.get("url"), f"{r['owner']['login']}/{r['name']}")))
     # Repos known to forge my authorship (profile.json): never read, whatever source lists them.
     for key in (k.lower() for k in CONFIG.get("exclude_repos", [])):
         sources.pop(key, None)
@@ -449,7 +455,7 @@ def collect():
                 foreign.setdefault(sha, (owner, name, private))
     try:
         gitea = gitea_stats.collect(GITEA_TOKEN, sources, set(commits), own_shas,
-                                  language_of, added_bytes, secrets)
+                                  language_of, added_bytes, secrets, github_public=public_metadata)
     except Exception:
         raise SystemExit("Gitea collection failed; private diagnostics suppressed; nothing was written") from None
     if gitea["status"] == "authenticated":
@@ -714,8 +720,10 @@ def panel_activity(data) -> tuple[str, dict]:
     full = data["has_private"] or data.get("providers", {}).get("gitea", {}).get("status") == "authenticated"
     commits = len(data["times"]) if full else cc["totalCommitContributions"]
     pre = "public " if (private or full) else ""
+    commit_label = "commits, both hosts" if data.get("providers", {}).get("gitea", {}).get("status") == "authenticated" else (
+        "commits, all repos" if full else pre + "commits")
     items = [(fmt(total), head_label),
-             (fmt(commits), "commits, all repos" if full else pre + "commits"),
+             (fmt(commits), commit_label),
              (fmt(cc["totalPullRequestContributions"]), pre + "pull requests"),
              (fmt(cc["totalIssueContributions"]), pre + "issues"), (fmt(active), "active days")]
 
@@ -949,7 +957,7 @@ def card_featured(data, p) -> str:
         parts.append(f'<circle cx="31" cy="{y - 4.5}" r="2.5" fill="{T["subtle"]}"/>')
         parts.append(text(44, y, f, "f mu", 14))
     parts.append(f'<line x1="1" y1="{h - 52.5}" x2="{W - 1}" y2="{h - 52.5}" stroke="{T["border"]}"/>')
-    counts = (f"{fmt(data['my_commits'].get(p['repo'], 0))} yours / "
+    counts = (f"{fmt(data['my_commits'].get(p['repo'], 0))} mine / "
               f"{fmt(data.get('total_commits', {}).get(p['repo'], 0))}")
     parts += card_footer(24, h - 21, r, [(counts, "total"),
                                          (len(rels), "releases"), (fmt(dl), "downloads")])
@@ -1054,7 +1062,19 @@ def leak_check(files: dict[str, str], secrets: set[str]) -> None:
         hay = content.lower()
         for s in needles:
             if re.search(r"(?<![a-z0-9])" + re.escape(s) + r"(?![a-z0-9])", hay):
-                sys.exit(f"leak check failed in {fname}: private repo metadata found; nothing was written")
+                group = ""
+                if fname == "stats.json":
+                    try:
+                        payload = json.loads(content)
+                    except ValueError:
+                        payload = {}
+                    if not isinstance(payload, dict):
+                        payload = {}
+                    for field in ("projects", "other_repos", "providers", "releases", "languages", "contributions", "rhythm"):
+                        if re.search(r"(?<![a-z0-9])" + re.escape(s) + r"(?![a-z0-9])", json.dumps(payload.get(field), ensure_ascii=False).lower()):
+                            group = " in " + field
+                            break
+                sys.exit(f"leak check failed in {fname}: private repo metadata found{group}; nothing was written")
     print(f"leak check passed: {len(files)} files, {len(needles)} private strings checked")
 
 

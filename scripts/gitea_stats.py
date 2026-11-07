@@ -131,11 +131,12 @@ def diff_languages(diff, files, language_of, added_bytes, secrets, stats):
 
 
 def collect(token, github_sources, github_shas, github_own_shas, language_of, added_bytes,
-            secrets, *, api=None, mirrors=None):
+            secrets, *, api=None, mirrors=None, github_public=None):
     if not token:
         return {"status": "missing_token", "raw": None, "included": None, "times": {},
                 "own_shas": set(), "languages": Counter(), "releases": []}
     api = api or API(token)
+    initial_secrets = {value.lower() for value in secrets}
     user = api.get("/user")
     if not isinstance(user.get("id"), int) or not user.get("login"):
         raise SystemExit("Gitea authentication response invalid; nothing was written")
@@ -214,6 +215,18 @@ def collect(token, github_sources, github_shas, github_own_shas, language_of, ad
             raise SystemExit("Gitea mirror mapping is cyclic or its canonical repository is unavailable; nothing was written")
         return canonical(mappings[key], trail + (key,)) if key in mappings else key
     included_keys = {key for key in records if canonical(key) == key}
+    # A verified mirror can have the same name/description as its public GitHub
+    # canonical repository. Those exact, already-public fields must remain
+    # renderable. No Gitea URL, alternate mirror name, or private GH field is
+    # exempted, and existing GitHub privacy needles are never weakened.
+    public_mirror_fields = set()
+    for key in records:
+        target = canonical(key)
+        if target.startswith("github:"):
+            public_mirror_fields.update(value.lower() for value in (github_public or {}).get(target[7:], set()) if value)
+    for value in list(secrets):
+        if value.lower() in public_mirror_fields and value.lower() not in initial_secrets:
+            secrets.discard(value)
     # Shared history alone cannot tell a fork from a mirror. Demand an explicit
     # repository identity before publishing full sizes/releases twice.
     for key in included_keys:

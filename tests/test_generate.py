@@ -197,7 +197,7 @@ class CollectTest(unittest.TestCase):
         project = json.loads(out["stats.json"])["projects"][0]
         self.assertEqual((project["commits"], project["total_commits"]), (7, 19))
         for theme in ("light", "dark"):
-            self.assertIn("7 yours / 19 total", out[f"card-alpha-{theme}.svg"])
+            self.assertIn("7 mine / 19 total", out[f"card-alpha-{theme}.svg"])
         with mock.patch("sys.stdout", new_callable=io.StringIO):
             g.leak_check(out, self.data["secrets"])          # exits on any private name
 
@@ -261,7 +261,8 @@ class FeaturedCommitTest(unittest.TestCase):
         for theme in g.THEMES.values():
             with mock.patch.object(g, "T", theme):
                 svg = g.card_featured(data, project)
-            self.assertIn("171 yours / 320 total", svg)
+            self.assertIn("171 mine / 320 total", svg)
+            self.assertNotIn("yours", svg)
             root = ET.fromstring(svg)
             self.assertEqual(root.attrib["viewBox"], "0 0 840 222")
             footer = [e for e in root.iter() if e.tag.endswith("text") and e.attrib.get("y") == "201.0"
