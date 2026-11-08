@@ -11,7 +11,7 @@
 <circle cx="26" cy="151.5" r="6" fill="#3572A5"/>
 <text x="38.0" y="156.0" class="f mu" font-size="13">Python</text>
 <polygon points="101.74,143.50 99.76,148.27 94.61,148.68 98.53,152.04 97.33,157.07 101.74,154.38 106.15,157.07 104.95,152.04 108.87,148.68 103.72,148.27" fill="none" stroke="#656d76" stroke-width="1.3" stroke-linejoin="round"/>
-<text x="114.7" y="156.0" class="f mu num" font-size="13">5</text>
+<text x="114.7" y="156.0" class="f mu num" font-size="13">6</text>
 <text x="390.0" y="156.0" class="mono mu" font-size="12" text-anchor="end">v2.0.0</text>
 <g fill="none" stroke="#656d76" stroke-width="1.3" stroke-linejoin="round"><path d="M327.8 146.5v5l7 7 5-5-7-7z"/><circle cx="331.1" cy="149.8" r=".9"/></g>
 </svg>
