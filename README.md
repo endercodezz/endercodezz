@@ -1,4 +1,4 @@
-<a href="https://enderlit.com"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/header-dark.37a52fb41b10032dc7818385c3246a0a97d7151222c0b69d757a4c9310563fd2.svg"><source media="(prefers-color-scheme: light)" srcset="assets/header-light.2e54f1e6e76e51ec0e5c50764afdb7bbb0c27e9a7126c733160eef5378e5e362.svg"><img src="assets/header-dark.37a52fb41b10032dc7818385c3246a0a97d7151222c0b69d757a4c9310563fd2.svg" width="100%" alt="enderlit: ports, recompilers and desktop tools that make things run where they shouldn't"></picture>
+<a href="https://enderlit.com"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/header-dark.0828b775edc0b95b6a33907b590237c9e61749d507a2ee966e9303858145bb17.svg"><source media="(prefers-color-scheme: light)" srcset="assets/header-light.bbfa12698b013c8e2063de45fd3bec2d66e7e32ea7d7b10118aec5c14b65d486.svg"><img src="assets/header-dark.0828b775edc0b95b6a33907b590237c9e61749d507a2ee966e9303858145bb17.svg" width="100%" alt="enderlit: ports, recompilers and desktop tools that make things run where they shouldn't"></picture>
 </a>
 
 <p align="center">
@@ -9,9 +9,9 @@ I like making software run where it was never meant to: a PSP game on a New 3DS,
 
 ## Featured
 
-<a href="https://github.com/endercodezz/P3P3DS"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/card-p3p3ds-dark.731f03dc648570ffd515bf2bd6e9f91104af22d35bc1d130675d07c77ee1e771.svg"><source media="(prefers-color-scheme: light)" srcset="assets/card-p3p3ds-light.bc9057c01dc3d60028668e411d3e43ca6d4ba072c96a759ed02770f8f638ccf9.svg"><img src="assets/card-p3p3ds-dark.731f03dc648570ffd515bf2bd6e9f91104af22d35bc1d130675d07c77ee1e771.svg" width="100%" alt="P3P3DS: Persona 3 Portable on the New Nintendo 3DS through static recompilation"></picture></a>
+<a href="https://github.com/endercodezz/P3P3DS"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/card-p3p3ds-dark.15dd1083ea4fe92cf0157c3d23754d20f9deb01b7dc2381a368e5e25a30059af.svg"><source media="(prefers-color-scheme: light)" srcset="assets/card-p3p3ds-light.a5ca3048f7b4220d86a00766583a32ddaf309e5a40d28bc046c162c5391bb319.svg"><img src="assets/card-p3p3ds-dark.15dd1083ea4fe92cf0157c3d23754d20f9deb01b7dc2381a368e5e25a30059af.svg" width="100%" alt="P3P3DS: Persona 3 Portable on the New Nintendo 3DS through static recompilation"></picture></a>
 
-<a href="https://github.com/endercodezz/BYDLO"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/card-bydlo-dark.711476e5f574f89283081c36e131c9e8be4f3115ffd9528af74d80272099d8b5.svg"><source media="(prefers-color-scheme: light)" srcset="assets/card-bydlo-light.341c3c0942479e23b967b76f8f4e7226a718baebf7aff4c4237689c460974a3a.svg"><img src="assets/card-bydlo-dark.711476e5f574f89283081c36e131c9e8be4f3115ffd9528af74d80272099d8b5.svg" width="100%" alt="BYDLO: one GUI launcher for VPN and proxy engines"></picture></a>
+<a href="https://github.com/endercodezz/BYDLO"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/card-bydlo-dark.8444255c9be69ed09c58f88d1e6129a413ab759456ad80c16c3e42d352553d63.svg"><source media="(prefers-color-scheme: light)" srcset="assets/card-bydlo-light.745ca3a6564e9403e026162d924eb0eedc139a8a0148184fa94c9d2749ccf922.svg"><img src="assets/card-bydlo-dark.8444255c9be69ed09c58f88d1e6129a413ab759456ad80c16c3e42d352553d63.svg" width="100%" alt="BYDLO: one GUI launcher for VPN and proxy engines"></picture></a>
 
 ## Also shipping
 
@@ -23,9 +23,9 @@ I like making software run where it was never meant to: a PSP game on a New 3DS,
 
 ## By the numbers
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="assets/activity-dark.d7ab7db1a2e7c4b6ac478f2bafa632001164182bc5309e5ab0a7df025589c5fd.svg"><source media="(prefers-color-scheme: light)" srcset="assets/activity-light.78a6fc064ecdf5f4732e4100953b0bccf5d70ac2e141b6d9112c46d10e019729.svg"><img src="assets/activity-dark.d7ab7db1a2e7c4b6ac478f2bafa632001164182bc5309e5ab0a7df025589c5fd.svg" width="100%" alt="Daily development activity from the available providers"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/activity-dark.4b428850bb8e31d77a1d7463fb852ee786638b96c58cf8c3035581415e63f7c9.svg"><source media="(prefers-color-scheme: light)" srcset="assets/activity-light.24ad776cb63630c091344e7a1414ead1e4adb58b07287c2e5d679995f012c5b3.svg"><img src="assets/activity-dark.4b428850bb8e31d77a1d7463fb852ee786638b96c58cf8c3035581415e63f7c9.svg" width="100%" alt="Daily development activity from the available providers"></picture>
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="assets/shipping-dark.38d07deec3e4ace81fc8834bb414e2b9bbd6c6009237214110c48e66334f9ee0.svg"><source media="(prefers-color-scheme: light)" srcset="assets/shipping-light.8c7d7177e323e4da0d2a1a74cb8f9106f9b1d782c6fdf7c7d60a3025842d09c1.svg"><img src="assets/shipping-dark.38d07deec3e4ace81fc8834bb414e2b9bbd6c6009237214110c48e66334f9ee0.svg" width="100%" alt="Releases over time, one lane per project"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/shipping-dark.c169992af8ce2201b9abf5e9395873931712be0b5960b31421a6f6cbc5a99883.svg"><source media="(prefers-color-scheme: light)" srcset="assets/shipping-light.bd32cf8742d9d7e69029da821bbdcc7b5be76db2a9fd1547fee45cc2eb19f5ab.svg"><img src="assets/shipping-dark.c169992af8ce2201b9abf5e9395873931712be0b5960b31421a6f6cbc5a99883.svg" width="100%" alt="Releases over time, one lane per project"></picture>
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="assets/languages-dark.a25faf2b314aac6cd112b74e2553f434037b26103c3d5d55acad43d4bc5db00c.svg"><source media="(prefers-color-scheme: light)" srcset="assets/languages-light.91f3bd7b05cb85d7e79bed7c38adbcb916cb795d195e06395f8cc316be6c60b2.svg"><img src="assets/languages-dark.a25faf2b314aac6cd112b74e2553f434037b26103c3d5d55acad43d4bc5db00c.svg" width="100%" alt="Languages by share of bytes"></picture>
 
@@ -42,7 +42,7 @@ I like making software run where it was never meant to: a PSP game on a New 3DS,
 | Unique commits | 946 · GitHub + Gitea |
 | GitHub public activity | 113 pull requests · 281 issues |
 | Daily development activity | busiest day 2026-11-03: 207 events · 79% in the last 30 days |
-| Releases | 41 published since Aug 2026 · 942 asset downloads |
+| Releases | 41 published since Aug 2026 · 950 asset downloads |
 | Commit rhythm | busiest hour Wed 01:00 UTC · 17% between 00:00 and 06:00 UTC · 28% on weekends |
 | Languages | C++ 44.5% · C# 27.2% · Python 14.0% · C 5.2% · TypeScript 3.3% · HTML 1.1% · Rust 1.0% · JavaScript 1.0% · Zig 0.5% · Other 2.3% |
 
@@ -60,5 +60,5 @@ I like making software run where it was never meant to: a PSP game on a New 3DS,
 <sub>Every chart on this page is redrawn every 3 hours (00:00, 03:00 … 21:00 UTC) by <a href=".github/workflows/refresh.yml">a workflow in this repo</a> from the GitHub and Gitea APIs. No time trackers and no third-party stat services. Private repositories count toward the totals and are never named.</sub>
 
 <!-- refresh:start -->
-<sub>Last updated: November 8, 2026 at 19:32 UTC</sub>
+<sub>Last updated: November 9, 2026 at 00:45 UTC</sub>
 <!-- refresh:end -->
