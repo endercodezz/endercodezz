@@ -8,7 +8,7 @@
 <text x="28.0" y="100.0" class="f t num" font-size="24" font-weight="600">1,375</text>
 <text x="28.0" y="120.0" class="f mu" font-size="12.5">development activity events</text>
 <line x1="278.7" y1="72" x2="278.7" y2="114" stroke="#d0d7de"/>
-<text x="294.7" y="100.0" class="f t num" font-size="24" font-weight="600">946</text>
+<text x="294.7" y="100.0" class="f t num" font-size="24" font-weight="600">940</text>
 <text x="294.7" y="120.0" class="f mu" font-size="12.5">unique commits · GitHub + Gitea</text>
 <line x1="545.3" y1="72" x2="545.3" y2="114" stroke="#d0d7de"/>
 <text x="561.3" y="100.0" class="f t num" font-size="24" font-weight="600">68</text>
@@ -399,6 +399,7 @@
 <rect x="786" y="232" width="11" height="11" rx="2" fill="#9be9a8"/>
 <rect x="786" y="246" width="11" height="11" rx="2" fill="#40c463"/>
 <rect x="786" y="260" width="11" height="11" rx="2" fill="#ebedf0"/>
+<rect x="786" y="274" width="11" height="11" rx="2" fill="#ebedf0"/>
 <text x="28.0" y="255.0" class="f mu" font-size="12">Mon</text>
 <text x="28.0" y="283.0" class="f mu" font-size="12">Wed</text>
 <text x="28.0" y="311.0" class="f mu" font-size="12">Fri</text>
