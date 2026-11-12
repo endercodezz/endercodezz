@@ -401,10 +401,11 @@
 <rect x="786" y="260" width="11" height="11" rx="2" fill="#21262d"/>
 <rect x="786" y="274" width="11" height="11" rx="2" fill="#39d353"/>
 <rect x="786" y="288" width="11" height="11" rx="2" fill="#21262d"/>
+<rect x="786" y="302" width="11" height="11" rx="2" fill="#21262d"/>
 <text x="28.0" y="255.0" class="f mu" font-size="12">Mon</text>
 <text x="28.0" y="283.0" class="f mu" font-size="12">Wed</text>
 <text x="28.0" y="311.0" class="f mu" font-size="12">Fri</text>
-<text x="28.0" y="355.0" class="f mu" font-size="12">Busiest day: 207 events on Nov 3 · 78% of activity in the last 30 days</text>
+<text x="28.0" y="355.0" class="f mu" font-size="12">Busiest day: 207 events on Nov 3 · 77% of activity in the last 30 days</text>
 <text x="792.0" y="355.0" class="f mu" font-size="12">More</text>
 <rect x="778.0" y="346" width="10" height="10" rx="2" fill="#39d353"/>
 <rect x="764.0" y="346" width="10" height="10" rx="2" fill="#26a641"/>
