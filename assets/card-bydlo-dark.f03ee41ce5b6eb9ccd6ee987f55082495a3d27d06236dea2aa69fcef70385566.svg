@@ -23,7 +23,7 @@
 <text x="146.9" y="201.0" class="f mu num" font-size="13">3</text>
 <text x="173.0" y="201.0" class="f mu num" font-size="13">253 mine / 604 total</text>
 <text x="312.9" y="201.0" class="f mu num" font-size="13">7 releases</text>
-<text x="390.5" y="201.0" class="f mu num" font-size="13">293 downloads</text>
+<text x="390.5" y="201.0" class="f mu num" font-size="13">295 downloads</text>
 <text x="816.0" y="201.0" class="f mu" font-size="13" text-anchor="end">v0.4.3 · yesterday</text>
 <rect x="653.4" y="187.0" width="48.9" height="20" rx="10" fill="none" stroke="#3fb950"/>
 <text x="677.8" y="201.0" class="f" font-size="12" font-weight="500" text-anchor="middle" fill="#3fb950">Latest</text>
